@@ -5,18 +5,43 @@ import (
 	"flag"
 	"fmt"
 	"net"
+	"os/exec"
 	"strings" // only needed below for sample processing
 )
 
 // Performance Monitor
 // relog 'C:\Path' -o text.csv -f csv
 
-func createCounter() {
+func createCollector(collectorSet string) {
+	// counters = ("\\LogicalDisk(*)\\% Free Space")
 
+	c := exec.Command(
+		"logman.exe",
+		"create",
+		"counter",
+		collectorSet,
+		"-c",
+		"\"\\LogicalDisk(*)\\% Free Space\"",
+		"-f",
+		"csv",
+		"-o",
+		"c:\\perflogs\\anvil_agent_stats.csv")
+
+	if err := c.Run(); err != nil {
+		fmt.Println("Error: ", err)
+	}
 }
 
-func startCounter() {
+func startCollector(collectorSet string) {
+	c := exec.Command(
+		"logman.exe",
+		"start",
+		"counter",
+		collectorSet)
 
+	if err := c.Run(); err != nil {
+		fmt.Println("Error: ", err)
+	}
 }
 
 func launchServer() {
@@ -45,19 +70,21 @@ func launchServer() {
 func main() {
 
 	// -- define command line args
-	iniCounterPtr := flag.Bool("ini-counter", false, "Initialize logman counter")
-	startCounterPtr := flag.Bool("start-counter", false, "Start perf-agent counter")
+	iniCollectorPtr := flag.Bool("ini-counter", false, "Initialize logman counter")
+	startCollectorPtr := flag.Bool("start-counter", false, "Start perf-agent counter")
 	runAgentPtr := flag.Bool("start-agent", false, "Start a server for the agent")
 
 	flag.Parse()
 
+	collectorSet := "anvil_agent_win"
+
 	// cli callbacks
-	if *iniCounterPtr {
-		createCounter()
+	if *iniCollectorPtr {
+		createCollector(collectorSet)
 	}
 
-	if *startCounterPtr {
-		startCounter()
+	if *startCollectorPtr {
+		startCollector(collectorSet)
 	}
 
 	if *runAgentPtr {
