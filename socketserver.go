@@ -12,10 +12,12 @@ import (
 // Performance Monitor
 // relog 'C:\Path' -o text.csv -f csv
 
-func createCollector(collectorSet string) {
+func createCollector(collectorSet string, logfilePath string) {
 	// counters = ("\\LogicalDisk(*)\\% Free Space")
 
-	c := exec.Command(
+	fmt.Printf("[task] Creating collector '%s'\n", collectorSet)
+
+	logmanCmd := exec.Command(
 		"logman.exe",
 		"create",
 		"counter",
@@ -24,23 +26,30 @@ func createCollector(collectorSet string) {
 		"\"\\LogicalDisk(*)\\% Free Space\"",
 		"-f",
 		"csv",
+		"-ow", // overwrite
 		"-o",
-		"c:\\perflogs\\anvil_agent_stats.csv")
+		logfilePath)
 
-	if err := c.Run(); err != nil {
-		fmt.Println("Error: ", err)
+	out, err := logmanCmd.Output()
+	if err != nil {
+		fmt.Printf("%s", out)
+		fmt.Println(err)
 	}
 }
 
 func startCollector(collectorSet string) {
-	c := exec.Command(
+
+	fmt.Printf("[task] Starting collector '%s'\n", collectorSet)
+
+	logmanCmd := exec.Command(
 		"logman.exe",
 		"start",
-		"counter",
 		collectorSet)
 
-	if err := c.Run(); err != nil {
-		fmt.Println("Error: ", err)
+	out, err := logmanCmd.Output()
+	if err != nil {
+		fmt.Printf("%s", out)
+		fmt.Println(err)
 	}
 }
 
@@ -70,17 +79,18 @@ func launchServer() {
 func main() {
 
 	// -- define command line args
-	iniCollectorPtr := flag.Bool("ini-counter", false, "Initialize logman counter")
-	startCollectorPtr := flag.Bool("start-counter", false, "Start perf-agent counter")
+	iniCollectorPtr := flag.Bool("ini-collector", false, "Initialize logman collector")
+	startCollectorPtr := flag.Bool("start-collector", false, "Start perf-agent collector")
 	runAgentPtr := flag.Bool("start-agent", false, "Start a server for the agent")
 
 	flag.Parse()
 
+	logfilePath := "c:\\perflogs\\anvil_agent_stats.csv"
 	collectorSet := "anvil_agent_win"
 
 	// cli callbacks
 	if *iniCollectorPtr {
-		createCollector(collectorSet)
+		createCollector(collectorSet, logfilePath)
 	}
 
 	if *startCollectorPtr {
