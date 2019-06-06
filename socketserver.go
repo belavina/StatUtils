@@ -1,15 +1,25 @@
 package main
 
-import "net"
-import "fmt"
-import "bufio"
-import "strings" // only needed below for sample processing
+import (
+	"bufio"
+	"flag"
+	"fmt"
+	"net"
+	"strings" // only needed below for sample processing
+)
 
-// Performance Moniotor
+// Performance Monitor
 // relog 'C:\Path' -o text.csv -f csv
 
-func main() {
+func createCounter() {
 
+}
+
+func startCounter() {
+
+}
+
+func launchServer() {
 	fmt.Println("Launching server...")
 
 	// listen on all interfaces
@@ -28,5 +38,29 @@ func main() {
 		newmessage := strings.ToUpper(message)
 		// send new string back to client
 		conn.Write([]byte(newmessage + "\n"))
+	}
+}
+
+// starting point
+func main() {
+
+	// -- define command line args
+	iniCounterPtr := flag.Bool("ini-counter", false, "Initialize logman counter")
+	startCounterPtr := flag.Bool("start-counter", false, "Start perf-agent counter")
+	runAgentPtr := flag.Bool("start-agent", false, "Start a server for the agent")
+
+	flag.Parse()
+
+	// cli callbacks
+	if *iniCounterPtr {
+		createCounter()
+	}
+
+	if *startCounterPtr {
+		startCounter()
+	}
+
+	if *runAgentPtr {
+		launchServer()
 	}
 }
