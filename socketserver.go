@@ -13,8 +13,6 @@ import (
 // relog 'C:\Path' -o text.csv -f csv
 
 func createCollector(collectorSet string, logfilePath string) {
-	// counters = ("\\LogicalDisk(*)\\% Free Space")
-
 	fmt.Printf("[task] Creating collector '%s'\n", collectorSet)
 
 	logmanCmd := exec.Command(
@@ -75,6 +73,42 @@ func launchServer() {
 	}
 }
 
+func getCollectorStatus(collectorSet string) map[string]string {
+
+	logmanCmd := exec.Command("logman.exe", "query", collectorSet)
+	out, err := logmanCmd.Output()
+	if err != nil {
+		fmt.Printf("%s", out)
+		fmt.Println(err)
+		return nil
+	}
+
+	var collectorStatusMap map[string]string
+
+	collectorStatusMap = make(map[string]string)
+
+	outStr := string(out[:])
+	lines := strings.Split(outStr, "\n")
+	for _, line := range lines {
+		keyValuePairs := strings.Split(line, ":")
+		if len(keyValuePairs) < 2 {
+			continue
+		}
+
+		value := strings.TrimSpace(strings.Join(keyValuePairs[1:], ":"))
+		collectorStatusMap[keyValuePairs[0]] = value
+
+	}
+
+	return collectorStatusMap
+}
+
+func getCurrentLogFile(collectorSet string) string {
+	logFile := getCollectorStatus(collectorSet)["Output Location"]
+
+	return logFile
+}
+
 // starting point
 func main() {
 
@@ -82,22 +116,24 @@ func main() {
 	iniCollectorPtr := flag.Bool("ini-collector", false, "Initialize logman collector")
 	startCollectorPtr := flag.Bool("start-collector", false, "Start perf-agent collector")
 	runAgentPtr := flag.Bool("start-agent", false, "Start a server for the agent")
+	logfilePath := flag.String("log-location", "c:\\perflogs\\anvil_agent_stats.csv", "Anvil agent log location")
+	collectorSet := flag.String("collector-name", "anvil_agent_win", "Anvil data collector name")
 
 	flag.Parse()
 
-	logfilePath := "c:\\perflogs\\anvil_agent_stats.csv"
-	collectorSet := "anvil_agent_win"
-
 	// cli callbacks
 	if *iniCollectorPtr {
-		createCollector(collectorSet, logfilePath)
+		createCollector(*collectorSet, *logfilePath)
 	}
 
 	if *startCollectorPtr {
-		startCollector(collectorSet)
+		startCollector(*collectorSet)
 	}
 
 	if *runAgentPtr {
-		launchServer()
+
+		out := getCurrentLogFile(*collectorSet)
+		fmt.Println(out)
+		// launchServer()
 	}
 }
