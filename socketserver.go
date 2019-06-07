@@ -2,9 +2,13 @@ package main
 
 import (
 	"bufio"
+	"encoding/csv"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
+	"os"
 	"os/exec"
 	"strings" // only needed below for sample processing
 )
@@ -109,6 +113,49 @@ func getCurrentLogFile(collectorSet string) string {
 	return logFile
 }
 
+type SysStat struct {
+	date  string
+	key   string
+	value string
+}
+
+func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
+
+	csvFile, err := os.Open("./test.csv")
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	defer csvFile.Close()
+	reader := csv.NewReader(csvFile)
+	reader.FieldsPerRecord = -1
+
+	csvData, err := reader.ReadAll()
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var statEntry SysStat
+	var stats []SysStat
+
+	for _, each := range csvData {
+		statEntry.date = each[0]
+		statEntry.key = each[1]
+		statEntry.value = each[2]
+
+		stats = append(stats, statEntry)
+	}
+
+	jsonData, err := json.Marshal(stats)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	w.Write(jsonData)
+}
+
 // starting point
 func main() {
 
@@ -132,8 +179,10 @@ func main() {
 
 	if *runAgentPtr {
 
-		out := getCurrentLogFile(*collectorSet)
-		fmt.Println(out)
+		// out := getCurrentLogFile(*collectorSet)
+		// fmt.Println(out)
+		http.HandleFunc("/sysstats", sysstatsHandler)
+		http.ListenAndServe(":9159", nil)
 		// launchServer()
 	}
 }
