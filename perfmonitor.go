@@ -5,12 +5,13 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
-	"os"
+	"os/exec"
 )
 
 // SysStat Performance statistics
@@ -20,23 +21,22 @@ type SysStat struct {
 	Value string // current value of sys stat (cpu usage %, free space)
 }
 
-// Processes http request for latest system performance statistics
-func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
+// Convert sysStat in csv format to json
+func sysStatCSVToJSON(cmdOut []byte) []byte {
 
-	csvFile, err := os.Open("./test.csv")
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	defer csvFile.Close()
-	reader := csv.NewReader(csvFile)
+	reader := csv.NewReader(bytes.NewReader(cmdOut))
 	reader.FieldsPerRecord = -1
 
 	csvData, err := reader.ReadAll()
 
+	if csvData == nil {
+		fmt.Println("CSV data is empty")
+		return nil
+	}
+
 	if err != nil {
 		fmt.Println(err)
-		return
+		return nil
 	}
 
 	var statEntry SysStat
@@ -56,6 +56,26 @@ func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
+	return jsonData
+}
+
+// Query performance stats on windows platform
+func queryWindowsSysStats() []byte {
+
+	// sysStats := exec.Command("/bin/bash", "./fake.sh")
+	sysStats := exec.Command("powershell.exe", "./SysStats.ps1")
+
+	out, err := sysStats.Output()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	return out
+}
+
+// Processes http request for latest system performance statistics
+func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
+	jsonData := sysStatCSVToJSON(queryWindowsSysStats())
 	w.Write(jsonData)
 }
 
