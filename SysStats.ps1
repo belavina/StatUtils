@@ -15,7 +15,9 @@ Param(
 if ($Server -ne ""){$Server = ("\\") + $Server} else {$Server = ""}
 
 $Counters = @(
-"$Server\LogicalDisk(*)\% Free Space"
+"$Server\LogicalDisk(*)\% Free Space",
+"$Server\Processor Information(*)\% Processor Time",
+"$Server\Memory\Available Bytes"
 )
 
 $results = @()
