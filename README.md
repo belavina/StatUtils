@@ -1,3 +1,6 @@
+# StatUtils
+
+Collection of utilities for querying hardware statistics and information
 
 REQUIREMENTS:
 ```
