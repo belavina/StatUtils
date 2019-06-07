@@ -24,11 +24,11 @@ $results = @()
 
 Get-Counter -Counter $Counters | ForEach {
     $_.CounterSamples | ForEach {
-        $details = @{            
-                Date  = get-date              
-                Path  = $_.Path                
+        $details = @{
+                Date  = get-date
+                Path  = $_.Path
                 Value = $_.CookedValue
-        }                           
+        }
         $results += New-Object PSObject -Property $details 
     }
 }
