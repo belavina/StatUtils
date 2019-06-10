@@ -20,7 +20,11 @@ Start perfmonitor by running:
 
 ### HTTP Interface
 
-Current performance stats can be accessed at HTTP port `:9159`, data is returned in the following JSON format:
+Current performance stats can be accessed at HTTP port `:9159` & route `/sysstats`:
+
+`$ curl -i "http://{{win_vm_host}}:9159/sysstats"`
+
+data is returned in the following JSON format:
 
 ```
 [  

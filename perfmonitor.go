@@ -88,7 +88,7 @@ func main() {
 
 	// -- define command line args
 	httpPortPtr := flag.Int("port", 9159, "HTTP server port")
-	version := flag.Bool("version", false, "prints current perfmonitor versio and exit")
+	version := flag.Bool("version", false, "print current perfmonitor version and exit")
 
 	flag.Parse()
 
