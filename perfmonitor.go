@@ -26,6 +26,8 @@ func main() {
 	flag.Parse()
 
 	perfstats.SayHi()
+	perfstats.PlatformSysStats()
+
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
