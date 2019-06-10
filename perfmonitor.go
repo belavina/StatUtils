@@ -11,8 +11,12 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
+	"os"
 	"os/exec"
 )
+
+// AppVersion - current app version
+const AppVersion = "1.0.0"
 
 // SysStat Performance statistics
 type SysStat struct {
@@ -84,7 +88,14 @@ func main() {
 
 	// -- define command line args
 	httpPortPtr := flag.Int("port", 9159, "HTTP server port")
+	version := flag.Bool("version", false, "prints current perfmonitor versio and exit")
+
 	flag.Parse()
+
+	if *version {
+		fmt.Println(AppVersion)
+		os.Exit(0)
+	}
 
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
