@@ -6,17 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+
+	"./sysstat"
 )
 
 func SayHi() {
 	fmt.Println("hi windows")
-}
-
-// SysStat Performance statistics
-type SysStat struct {
-	Date  string // date when stat item was grabbed
-	Key   string // type of sys stats (memory, cpu etc.)
-	Value string // current value of sys stat (cpu usage %, free space)
 }
 
 // Convert sysStat in csv format to json
@@ -37,8 +32,8 @@ func sysStatCSVToJSON(cmdOut []byte) []byte {
 		return nil
 	}
 
-	var statEntry SysStat
-	var stats []SysStat
+	var statEntry sysstat.SysStat
+	var stats []sysstat.SysStat
 
 	for _, each := range csvData[1:] {
 		statEntry.Date = each[0]
@@ -61,9 +56,9 @@ func sysStatCSVToJSON(cmdOut []byte) []byte {
 func queryWindowsSysStats() []byte {
 
 	// sysStats := exec.Command("/bin/bash", "./fake.sh")
-	sysStats := exec.Command("powershell.exe", "./SysStats.ps1")
+	cmdResult := exec.Command("powershell.exe", "./SysStats.ps1")
 
-	out, err := sysStats.Output()
+	out, err := cmdResult.Output()
 	if err != nil {
 		fmt.Println(err)
 	}
