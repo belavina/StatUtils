@@ -101,7 +101,7 @@ func getCPUStats() []SysStat {
 
 	// match date format returned by win
 	dt := time.Now()
-	dateFormatted := dt.Format("1/2/2006 03:04:05 PM")
+	dateFormatted := dt.Format("1/2/2006 3:04:05 PM")
 
 	timeBetweenSamples := 2 * time.Second
 
