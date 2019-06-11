@@ -6,8 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
-
-	"./sysstat"
 )
 
 // Convert sysStat in csv format to json
