@@ -6,25 +6,30 @@ Collection of utilities for querying hardware statistics and information for Anv
 
 Perfomonitor is a server returning system performance data upon a request;
 
-### Running
+### Running Windows
 
 Open `PowerShell` as `Administrator` and run the following command:
 
-
-    Set-ExecutionPolicy RemoteSigned
+`Set-ExecutionPolicy RemoteSigned`
 
 Start perfmonitor by running:
 
+`./perfmonitor.exe`
 
-    perfmonitor.exe
+### Running Linux
+
+Start perfmonitor by running:
+
+`./perfmonitor`
+
 
 ### HTTP Interface
 
 Current performance stats can be accessed at HTTP port `:9159` & route `/sysstats`:
 
-`$ curl -i "http://{{win_vm_host}}:9159/sysstats"`
+`$ curl -i "http://{{vm_host}}:9159/sysstats"`
 
-data is returned in the following JSON format:
+data is returned in the following JSON format (this is windows example, Keys won't match the linux output):
 
 ```
 [  
@@ -45,6 +50,17 @@ data is returned in the following JSON format:
    }
    ...
 ]
+```
+
+You can find os of the vm `perfmonitor` is running on by querying:
+
+`$ curl -i "http://{{vm_host}}:9159/platform"`
+
+```
+{
+   "machine":"my.hostname",
+   "platform":"linux" // or "windows"
+}
 ```
 
 ### Compilation

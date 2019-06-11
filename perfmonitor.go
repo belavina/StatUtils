@@ -14,14 +14,7 @@ import (
 )
 
 // AppVersion - current app version
-const AppVersion = "1.0.0"
-
-// SysStat Performance statistics
-type SysStat struct {
-	Date  string // date when stat item was grabbed
-	Key   string // type of sys stats (memory, cpu etc.)
-	Value string // current value of sys stat (cpu usage %, free space)
-}
+const AppVersion = "1.1.0"
 
 // Processes http request for latest system performance statistics
 func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
