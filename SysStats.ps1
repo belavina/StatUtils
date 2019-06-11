@@ -37,4 +37,7 @@ if ($export -And $outpath -ne "") {
     $results | export-csv -Path $outpath -NoTypeInformation
 }
 
-Write-Host ($results | convertto-csv -NoTypeInformation)
+Write-Host('"Date","Key","Value"')
+$results| ForEach {
+    Write-Host('"{0}","{1}","{2}"' -f $_.Date, $_.Path, $_.Value)
+}
