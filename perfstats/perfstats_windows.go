@@ -10,10 +10,6 @@ import (
 	"./sysstat"
 )
 
-func SayHi() {
-	fmt.Println("hi windows")
-}
-
 // Convert sysStat in csv format to json
 func sysStatCSVToJSON(cmdOut []byte) []byte {
 
