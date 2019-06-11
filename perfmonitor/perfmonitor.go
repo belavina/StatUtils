@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"./perfstats"
+	"StatUtils/perfstats"
 )
 
 // AppVersion - current app version
