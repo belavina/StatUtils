@@ -52,7 +52,10 @@ data is returned in the following JSON format:
 Building step requires golang binary release present on your system, navigate to the [official downlad page](https://golang.org/dl/) to grab the latest 
 version.
 
-The .exe can be built for windows as:
+The .exe can be built for windows (on linux) as:
 
+`GOOS=windows GOARCH=amd64 go build -o perfmonitor.exe`
 
-    GOOS=windows GOARCH=amd64 go build -o perfmonitor.exe
+Or it can be compiled on windows as:
+
+`$env:GOOS="windows; $env:GOARCH="amd64";C:\Go\bin\go build -o perfmonitor.exe`
