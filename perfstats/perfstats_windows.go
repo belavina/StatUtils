@@ -26,8 +26,8 @@ func sysStatCSVToJSON(cmdOut []byte) []byte {
 		return nil
 	}
 
-	var statEntry sysstat.SysStat
-	var stats []sysstat.SysStat
+	var statEntry SysStat
+	var stats []SysStat
 
 	for _, each := range csvData[1:] {
 		statEntry.Date = each[0]
