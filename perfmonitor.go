@@ -14,14 +14,12 @@ import (
 
 // Processes http request for latest system performance statistics
 func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
-	jsonData := perfstats.PlatformSysStats()
-	w.Write(jsonData)
+	w.Write(perfstats.PlatformSysStats())
 }
 
 // Get host details such as platform & hostname
 func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	jsonData := perfstats.GetPlatformInfo()
-	w.Write(jsonData)
+	w.Write(perfstats.GetPlatformInfo())
 }
 
 func main() {
@@ -35,7 +33,7 @@ func main() {
 
 	// http routes:
 	http.HandleFunc("/sysstats", sysStatsHandler)
-	http.HandleFunc("/info", computerInfoHandler)
+	http.HandleFunc("/platform", computerInfoHandler)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }
