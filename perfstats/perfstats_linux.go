@@ -11,10 +11,6 @@ import (
 	"time"
 )
 
-func SayHi() {
-	fmt.Println("hi unix")
-}
-
 const (
 	procCPUUser    = iota
 	procCPUNice    = iota

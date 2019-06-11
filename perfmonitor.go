@@ -13,23 +13,29 @@ import (
 )
 
 // Processes http request for latest system performance statistics
-func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
+func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
 	jsonData := perfstats.PlatformSysStats()
 	w.Write(jsonData)
 }
 
-// starting point
+// Get host details such as platform & hostname
+func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	jsonData := perfstats.GetPlatformInfo()
+	w.Write(jsonData)
+}
+
 func main() {
 
 	// -- define command line args
 	httpPortPtr := flag.Int("port", 9159, "HTTP server port")
 	flag.Parse()
 
-	perfstats.SayHi()
-
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
-	http.HandleFunc("/sysstats", sysstatsHandler)
+	// http routes:
+	http.HandleFunc("/sysstats", sysStatsHandler)
+	http.HandleFunc("/info", computerInfoHandler)
+
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }

@@ -55,7 +55,6 @@ func sysStatCSVToJSON(cmdOut []byte) []byte {
 // Query performance stats on windows platform
 func queryWindowsSysStats() []byte {
 
-	// sysStats := exec.Command("/bin/bash", "./fake.sh")
 	cmdResult := exec.Command("powershell.exe", "./SysStats.ps1")
 
 	out, err := cmdResult.Output()
