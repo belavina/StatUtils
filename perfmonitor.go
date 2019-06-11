@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"os"
 
-	"StatUtils/perfstats"
+	"github.com/Seneca-CDOT/StatUtils/perfstats"
 )
 
 // AppVersion - current app version
