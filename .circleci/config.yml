@@ -26,9 +26,11 @@ jobs:
             zip ./release/linux_amd64.zip ./dist/perfmonitor ./INSTALL_LINUX.md
 
   deploy:
-    machine:
-      enabled: true
+    docker:
+      - image: circleci/golang:1.9
+
     working_directory: /go/src/github.com/Seneca-CDOT/StatUtils
+    
     steps:
       - run:
           name: "Publish Release on GitHub"
