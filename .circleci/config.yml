@@ -14,17 +14,7 @@ jobs:
       - run:
           name: "Build perfmonitor executables"
           command: |
-            mkdir ./dist
-            GOOS=windows GOARCH=amd64 go build -o dist/perfmonitor.exe
-            GOOS=linux GOARCH=amd64 go build -o dist/perfmonitor
-
-      - run:
-          name: "Package releases"
-          command: |
-            mkdir ./release
-            zip ./release/windows_amd64.zip ./dist/perfmonitor.exe ./INSTALL_WIN.md ./SysStats.ps1
-            zip ./release/linux_amd64.zip ./dist/perfmonitor ./INSTALL_LINUX.md
-
+            echo "hello"
   deploy:
     docker:
       - image: circleci/golang:1.9
@@ -32,21 +22,34 @@ jobs:
     working_directory: /go/src/github.com/Seneca-CDOT/StatUtils
     
     steps:
+      - checkout
+
       - run:
-          name: "Publish Release on GitHub"
+          name: "Get Utility Libraries"
           command: |
-            ls -l
-            go get github.com/tcnksm/ghr
-            VERSION=$(./dist/perfmonitor.out -version)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -soft
+            go get -u github.com/mitchellh/gox
+            go get -u github.com/tcnksm/ghr
+      - run:
+          name: "Build executables and package"
+          command: |
+            mkdir dist
+            mkdir releases
+            gox -os="linux windows" -arch="amd64" -output="dist/perfmonitor_{{.OS}}_{{.Arch}}"
+            zip release/windows_amd64.zip ./dist/perfmonitor_windows_amd64.exe ./INSTALL_WIN.md ./SysStats.ps1
+            zip ./release/linux_amd64.zip ./dist/perfmonitor_linux_amd64 ./INSTALL_LINUX.md
+      - run:
+          name: "Deploy on github releases"
+          command: |
+            VERSION=$(./dist/perfmonitor_linux_amd64 -version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -soft ${VERSION} releases/
 workflows:
   version: 2
   build-deploy:
     jobs:
-      - build
-      - deploy:
-          requires:
-            - build
+      # - build
+      - deploy
+          # requires:
+            # - build
           # filters:
           #   branches:
           #     only: -soft 
