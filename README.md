@@ -1,4 +1,4 @@
-# StatUtils
+# StatUtils [![CircleCI](https://circleci.com/gh/Seneca-CDOT/StatUtils/tree/master.svg?style=svg)](https://circleci.com/gh/Seneca-CDOT/StatUtils/tree/master)
 
 Collection of utilities for querying hardware statistics and information for Anvil! systems;
 
