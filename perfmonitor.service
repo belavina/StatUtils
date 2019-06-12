@@ -1,0 +1,11 @@
+[Unit]
+Description=Perfmonitor tool collecting system performance
+
+[Service]
+Type=idle
+Restart=always
+RestartSec=3
+ExecStart=/usr/bin/perfmonitor
+
+[Install]
+WantedBy=multi-user.target
