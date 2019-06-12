@@ -11,14 +11,27 @@ jobs:
     steps:
       - checkout
 
-      - run: go build -o /go/bin/perfmonitor.out
+      - run:
+          name: "Build perfmonitor executables"
+          command: |
+            mkdir ./dist
+            GOOS=windows GOARCH=amd64 go build -o dist/perfmonitor.exe
+            GOOS=linux GOARCH=amd64 go build -o dist/perfmonitor
+
+      - run:
+          name: "Package releases"
+          command: |
+            mkdir ./release
+            zip ./release/windows_amd64.zip ./dist/perfmonitor.exe ./INSTALL_WIN.md ./SysStats.ps1
+            zip ./release/linux_amd64.zip ./dist/perfmonitor ./INSTALL_LINUX.md
+
   deploy:
     machine:
       enabled: true
     working_directory: /go/src/github.com/Seneca-CDOT/StatUtils
     steps:
       - attach_workspace:
-          at: ./artifacts
+          at: ./release
       - run:
           name: "Publish Release on GitHub"
           command: |
