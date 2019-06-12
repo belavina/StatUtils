@@ -5,85 +5,27 @@
 package main
 
 import (
-	"bytes"
-	"encoding/csv"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
 	"os"
-	"os/exec"
+
+	"./perfstats"
 )
 
 // AppVersion - current app version
-const AppVersion = "1.0.0"
-
-// SysStat Performance statistics
-type SysStat struct {
-	Date  string // date when stat item was grabbed
-	Key   string // type of sys stats (memory, cpu etc.)
-	Value string // current value of sys stat (cpu usage %, free space)
-}
-
-// Convert sysStat in csv format to json
-func sysStatCSVToJSON(cmdOut []byte) []byte {
-
-	reader := csv.NewReader(bytes.NewReader(cmdOut))
-	reader.FieldsPerRecord = -1
-
-	csvData, err := reader.ReadAll()
-
-	if csvData == nil {
-		fmt.Println("CSV data is empty")
-		return nil
-	}
-
-	if err != nil {
-		fmt.Println(err)
-		return nil
-	}
-
-	var statEntry SysStat
-	var stats []SysStat
-
-	for _, each := range csvData[1:] {
-		statEntry.Date = each[0]
-		statEntry.Key = each[1]
-		statEntry.Value = each[2]
-
-		stats = append(stats, statEntry)
-	}
-
-	jsonData, err := json.Marshal(stats)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return jsonData
-}
-
-// Query performance stats on windows platform
-func queryWindowsSysStats() []byte {
-
-	// sysStats := exec.Command("/bin/bash", "./fake.sh")
-	sysStats := exec.Command("powershell.exe", "./SysStats.ps1")
-
-	out, err := sysStats.Output()
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	return out
-}
+const AppVersion = "1.1.0"
 
 // Processes http request for latest system performance statistics
-func sysstatsHandler(w http.ResponseWriter, r *http.Request) {
-	jsonData := sysStatCSVToJSON(queryWindowsSysStats())
-	w.Write(jsonData)
+func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write(perfstats.PlatformSysStats())
 }
 
-// starting point
+// Get host details such as platform & hostname
+func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write(perfstats.GetPlatformInfo())
+}
+
 func main() {
 
 	// -- define command line args
@@ -100,6 +42,9 @@ func main() {
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
-	http.HandleFunc("/sysstats", sysstatsHandler)
+	// http routes:
+	http.HandleFunc("/sysstats", sysStatsHandler)
+	http.HandleFunc("/platform", computerInfoHandler)
+
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }
