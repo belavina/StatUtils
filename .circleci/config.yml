@@ -23,7 +23,7 @@ jobs:
             mkdir pkg
             GOOS=windows GOARCH=amd64 go build -o dist/perfmonitor.exe
             GOOS=linux GOARCH=amd64 go build -o dist/perfmonitor
-            zip -r -j pkg/perfmonitor_win_amd64.zip dist/perfmonitor.exe ./INSTALL_WIN.md ./SysStats.ps1
+            zip -r -j pkg/perfmonitor_win_amd64.zip dist/perfmonitor.exe ./INSTALL_WIN.md ./SysStats.ps1 ./Perfmonitor.xml
             zip -r -j pkg/perfmonitor_linux_amd64.zip dist/perfmonitor ./INSTALL_LINUX.md ./perfmonitor.service
       - run:
           name: "Deploy on github releases"

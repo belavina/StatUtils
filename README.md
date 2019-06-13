@@ -9,7 +9,7 @@ Perfomonitor is a server returning system performance data upon a request;
 
 ### Release
 
-Navigate to [releases page](/releases) to grab the latest version of perfmonitor. Platform-specific bundles contain ready-to-use executables as well as instructions on how to install it on the target system.
+Navigate to [releases page](https://github.com/Seneca-CDOT/StatUtils/releases) to grab the latest version of perfmonitor. Platform-specific bundles contain ready-to-use executables as well as instructions on how to install it on the target system.
 
 
 **HTTP Interface**

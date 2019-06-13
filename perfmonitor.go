@@ -14,7 +14,7 @@ import (
 )
 
 // AppVersion - current app version
-const AppVersion = "0.0.1"
+const AppVersion = "0.0.2"
 
 // Processes http request for latest system performance statistics
 func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
