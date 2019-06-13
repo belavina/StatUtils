@@ -16,11 +16,13 @@ Navigate to [releases page](https://github.com/Seneca-CDOT/StatUtils/releases) t
 
 Current performance stats can be accessed at HTTP port `:9159` & route `/sysstats`:
 
-`$ curl -i "http://{{vm_host}}:9159/sysstats"`
+```bash
+$ curl -i "http://{{vm_host}}:9159/sysstats"
+```
 
 data is returned in the following JSON format (this is windows example, Keys won't match the linux output):
 
-```
+```javascript
 [  
    {  
       "Date":"6/9/2019 10:16:39 PM",
@@ -43,9 +45,11 @@ data is returned in the following JSON format (this is windows example, Keys won
 
 You can find os of the vm `perfmonitor` is running on by querying:
 
-`$ curl -i "http://{{vm_host}}:9159/platform"`
-
+```bash
+$ curl -i "http://{{vm_host}}:9159/platform"
 ```
+
+```javascript
 {
    "machine":"my.hostname",
    "platform":"linux" // or "windows"
@@ -58,7 +62,32 @@ Building & development requires golang binary release present on your system, na
 
 Note that it can be installed on fedora systems as:
 
-`sudo dnf install golang`
+```bash
+$ dnf install golang -y
+```
+
+**Package Installation**
+
+Grab the latest `perfmonitor` by running:
+
+```bash
+# installs in ~/go/src/github.com/Seneca-CDOT/StatUtils
+go get github.com/Seneca-CDOT/StatUtils 
+```
+
+**Compilation**
+
+The .exe can be built for windows (on linux) as:
+
+`GOOS=windows GOARCH=amd64 go build -o perfmonitor.exe`
+
+Or it can be compiled on windows as:
+
+`$env:GOOS="windows; $env:GOARCH="amd64";C:\Go\bin\go build -o perfmonitor.exe`
+
+Linux executable can be created with the following command:
+
+`GOOS=linux GOARCH=amd64 go build -o perfmonitor`
 
 **Running Windows**
 
@@ -75,18 +104,3 @@ Start perfmonitor by running:
 Start perfmonitor by running:
 
 `./perfmonitor`
-
-**Compilation**
-
-
-The .exe can be built for windows (on linux) as:
-
-`GOOS=windows GOARCH=amd64 go build -o perfmonitor.exe`
-
-Or it can be compiled on windows as:
-
-`$env:GOOS="windows; $env:GOARCH="amd64";C:\Go\bin\go build -o perfmonitor.exe`
-
-Linux executable can be created with the following command:
-
-`GOOS=linux GOARCH=amd64 go build -o perfmonitor`
