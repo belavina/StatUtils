@@ -2,7 +2,6 @@ package perfstats
 
 import (
 	"bufio"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -168,17 +167,17 @@ func getMemoryStats() SysStat {
 }
 
 // PlatformSysStats Query performance stats on linux platform
-func PlatformSysStats() []byte {
+func PlatformSysStats() ([]SysStat, error) {
 
 	var stats []SysStat
 	stats = append(stats, getCPUStats()...)
 	stats = append(stats, getMemoryStats())
 
-	jsonData, err := json.Marshal(stats)
-	if err != nil {
-		fmt.Println("Error!")
-		fmt.Println(err)
-	}
+	// jsonData, err := json.Marshal(stats)
+	// if err != nil {
+	// 	fmt.Println("Error!")
+	// 	fmt.Println(err)
+	// }
 
-	return jsonData
+	return stats, nil
 }

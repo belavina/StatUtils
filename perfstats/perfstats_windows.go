@@ -9,7 +9,7 @@ import (
 )
 
 // Convert sysStat in csv format to json
-func sysStatCSVToJSON(cmdOut []byte) []byte {
+func sysStatCSVToSysStat(cmdOut []byte) SysStat {
 
 	reader := csv.NewReader(bytes.NewReader(cmdOut))
 	reader.FieldsPerRecord = -1
@@ -59,6 +59,6 @@ func queryWindowsSysStats() []byte {
 	return out
 }
 
-func PlatformSysStats() []byte {
-	return sysStatCSVToJSON(queryWindowsSysStats())
+func PlatformSysStats() ([]SysStat, error) {
+	return sysStatCSVToSysStat(queryWindowsSysStats()), nil
 }

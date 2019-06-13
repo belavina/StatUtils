@@ -1,32 +1,23 @@
 package perfstats
 
 import (
-	"encoding/json"
-	"fmt"
 	"os"
 	"runtime"
 )
 
 // SysStat Performance statistics
 type SysStat struct {
-	Date  string // date when stat item was grabbed
-	Key   string // type of sys stats (memory, cpu etc.)
-	Value string // current value of sys stat (cpu usage %, free space)
+	Date  string `json:"date"`
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // GetPlatformInfo show platform details
-func GetPlatformInfo() []byte {
+func GetPlatformInfo() (map[string]string, error) {
 
 	hostname, _ := os.Hostname()
-	jsonData, err := json.Marshal(map[string]string{
+	return map[string]string{
 		"platform": runtime.GOOS,
 		"machine":  hostname,
-	})
-
-	if err != nil {
-		fmt.Println("Error!")
-		fmt.Println(err)
-	}
-
-	return jsonData
+	}, nil
 }

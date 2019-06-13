@@ -5,6 +5,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -16,14 +17,37 @@ import (
 // AppVersion - current app version
 const AppVersion = "0.0.1"
 
-// Processes http request for latest system performance statistics
-func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(perfstats.PlatformSysStats())
+type response struct {
+	Status  string `json:"status"`
+	Data    []byte `json:"data"`
+	Message string `json:"message"`
 }
 
+type appHandler func(http.ResponseWriter, *http.Request) error
+
+func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if err := fn(w, r); err != nil {
+		http.Error(w, err.Error(), 500)
+	}
+}
+
+// Processes http request for latest system performance statistics
+// func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
+
+// 	// json.Marshal(stats)
+// 	w.Write(json.Marshal(perfstats.PlatformSysStats()))
+// }
+
 // Get host details such as platform & hostname
-func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(perfstats.GetPlatformInfo())
+func computerInfoHandler(w http.ResponseWriter, r *http.Request) error {
+	data, err := perfstats.GetPlatformInfo()
+
+	if err != nil {
+		return err
+	}
+
+	w.Write(json.Marshal(data))
+	return nil
 }
 
 func main() {
@@ -43,8 +67,8 @@ func main() {
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
 	// http routes:
-	http.HandleFunc("/sysstats", sysStatsHandler)
-	http.HandleFunc("/platform", computerInfoHandler)
+	// http.HandleFunc("/sysstats", appHandler(sysStatsHandler))
+	http.HandleFunc("/platform", appHandler(computerInfoHandler))
 
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }
