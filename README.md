@@ -6,24 +6,13 @@ Collection of utilities for querying hardware statistics and information for Anv
 
 Perfomonitor is a server returning system performance data upon a request;
 
-### Running Windows
 
-Open `PowerShell` as `Administrator` and run the following command:
+### Release
 
-`Set-ExecutionPolicy RemoteSigned`
-
-Start perfmonitor by running:
-
-`./perfmonitor.exe`
-
-### Running Linux
-
-Start perfmonitor by running:
-
-`./perfmonitor`
+Navigate to [releases page](./releases) to grab the latest version of perfmonitor. Platform-specific bundles contain ready-to-use executables as well as instructions on how to install it on the target system.
 
 
-### HTTP Interface
+**HTTP Interface**
 
 Current performance stats can be accessed at HTTP port `:9159` & route `/sysstats`:
 
@@ -63,10 +52,32 @@ You can find os of the vm `perfmonitor` is running on by querying:
 }
 ```
 
-### Compilation
+### Development
 
-Building step requires golang binary release present on your system, navigate to the [official downlad page](https://golang.org/dl/) to grab the latest 
-version.
+Building & development requires golang binary release present on your system, navigate to the [official "Getting Started" page](https://golang.org/doc/install) to grab the latest version.
+
+Note that it can be installed on fedora systems as:
+
+`sudo dnf install golang`
+
+**Running Windows**
+
+Open `PowerShell` as `Administrator` and run the following command:
+
+`Set-ExecutionPolicy RemoteSigned`
+
+Start perfmonitor by running:
+
+`./perfmonitor.exe`
+
+**Running Linux**
+
+Start perfmonitor by running:
+
+`./perfmonitor`
+
+**Compilation**
+
 
 The .exe can be built for windows (on linux) as:
 
