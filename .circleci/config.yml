@@ -1,0 +1,41 @@
+# Golang CircleCI 2.0 configuration file
+#
+# Check https://circleci.com/docs/2.0/language-go/ for more details
+version: 2
+jobs:
+  deploy:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: /go/src/github.com/Seneca-CDOT/StatUtils
+    
+    steps:
+      - checkout
+
+      - run:
+          name: "Get Utility Libraries"
+          command: |
+            go get -u github.com/tcnksm/ghr
+      - run:
+          name: "Build executables and package"
+          command: |
+            mkdir dist
+            mkdir pkg
+            GOOS=windows GOARCH=amd64 go build -o dist/perfmonitor.exe
+            GOOS=linux GOARCH=amd64 go build -o dist/perfmonitor
+            zip -r -j pkg/perfmonitor_win_amd64.zip dist/perfmonitor.exe ./INSTALL_WIN.md ./SysStats.ps1 ./Perfmonitor.xml
+            zip -r -j pkg/perfmonitor_linux_amd64.zip dist/perfmonitor ./INSTALL_LINUX.md ./perfmonitor.service
+      - run:
+          name: "Deploy on github releases"
+          command: |
+            VERSION="v$(dist/perfmonitor -version)"
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -soft ${VERSION} pkg/
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - deploy:
+          filters:
+            branches:
+              only:
+                - master

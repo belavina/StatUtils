@@ -1,4 +1,4 @@
-# StatUtils
+# StatUtils [![CircleCI](https://circleci.com/gh/Seneca-CDOT/StatUtils/tree/master.svg?style=svg)](https://circleci.com/gh/Seneca-CDOT/StatUtils/tree/master)
 
 Collection of utilities for querying hardware statistics and information for Anvil! systems;
 
@@ -6,32 +6,23 @@ Collection of utilities for querying hardware statistics and information for Anv
 
 Perfomonitor is a server returning system performance data upon a request;
 
-### Running Windows
 
-Open `PowerShell` as `Administrator` and run the following command:
+### Release
 
-`Set-ExecutionPolicy RemoteSigned`
-
-Start perfmonitor by running:
-
-`./perfmonitor.exe`
-
-### Running Linux
-
-Start perfmonitor by running:
-
-`./perfmonitor`
+Navigate to [releases page](https://github.com/Seneca-CDOT/StatUtils/releases) to grab the latest version of perfmonitor. Platform-specific bundles contain ready-to-use executables as well as instructions on how to install it on the target system.
 
 
-### HTTP Interface
+**HTTP Interface**
 
 Current performance stats can be accessed at HTTP port `:9159` & route `/sysstats`:
 
-`$ curl -i "http://{{vm_host}}:9159/sysstats"`
+```bash
+$ curl -i "http://{{vm_host}}:9159/sysstats"
+```
 
 data is returned in the following JSON format (this is windows example, Keys won't match the linux output):
 
-```
+```javascript
 [  
    {  
       "Date":"6/9/2019 10:16:39 PM",
@@ -54,19 +45,37 @@ data is returned in the following JSON format (this is windows example, Keys won
 
 You can find os of the vm `perfmonitor` is running on by querying:
 
-`$ curl -i "http://{{vm_host}}:9159/platform"`
-
+```bash
+$ curl -i "http://{{vm_host}}:9159/platform"
 ```
+
+```javascript
 {
    "machine":"my.hostname",
    "platform":"linux" // or "windows"
 }
 ```
 
-### Compilation
+### Development
 
-Building step requires golang binary release present on your system, navigate to the [official downlad page](https://golang.org/dl/) to grab the latest 
-version.
+Building & development requires golang binary release present on your system, navigate to the [official "Getting Started" page](https://golang.org/doc/install) to grab the latest version.
+
+Note that it can be installed on fedora systems as:
+
+```bash
+$ dnf install golang -y
+```
+
+**Package Installation**
+
+Grab the latest `perfmonitor` by running:
+
+```bash
+# installs in ~/go/src/github.com/Seneca-CDOT/StatUtils
+go get github.com/Seneca-CDOT/StatUtils 
+```
+
+**Compilation**
 
 The .exe can be built for windows (on linux) as:
 
@@ -79,3 +88,19 @@ Or it can be compiled on windows as:
 Linux executable can be created with the following command:
 
 `GOOS=linux GOARCH=amd64 go build -o perfmonitor`
+
+**Running Windows**
+
+Open `PowerShell` as `Administrator` and run the following command:
+
+`Set-ExecutionPolicy RemoteSigned`
+
+Start perfmonitor by running:
+
+`./perfmonitor.exe`
+
+**Running Linux**
+
+Start perfmonitor by running:
+
+`./perfmonitor`
