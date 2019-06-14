@@ -18,36 +18,44 @@ import (
 const AppVersion = "0.0.1"
 
 type response struct {
-	Status  string `json:"status"`
-	Data    []byte `json:"data"`
-	Message string `json:"message"`
+	Status  string      `json:"status"`
+	Data    interface{} `json:"data"`
+	Message string      `json:"message"`
 }
 
-type appHandler func(http.ResponseWriter, *http.Request) error
+type getData func() (interface{}, error)
 
-func (fn appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if err := fn(w, r); err != nil {
-		http.Error(w, err.Error(), 500)
+func processRequest(w http.ResponseWriter, f getData) {
+	w.Header().Set("Content-Type", "application/json")
+
+	data, err := f()
+
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(response{
+			Status:  "error",
+			Data:    nil,
+			Message: err.Error(),
+		})
+		return
 	}
+
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(response{
+		Status:  "success",
+		Data:    data,
+		Message: "",
+	})
 }
 
 // Processes http request for latest system performance statistics
-// func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
-
-// 	// json.Marshal(stats)
-// 	w.Write(json.Marshal(perfstats.PlatformSysStats()))
-// }
+func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
+	processRequest(w, perfstats.PlatformSysStats)
+}
 
 // Get host details such as platform & hostname
-func computerInfoHandler(w http.ResponseWriter, r *http.Request) error {
-	data, err := perfstats.GetPlatformInfo()
-
-	if err != nil {
-		return err
-	}
-
-	w.Write(json.Marshal(data))
-	return nil
+func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
+	processRequest(w, perfstats.GetPlatformInfo)
 }
 
 func main() {
@@ -67,8 +75,8 @@ func main() {
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
 	// http routes:
-	// http.HandleFunc("/sysstats", appHandler(sysStatsHandler))
-	http.HandleFunc("/platform", appHandler(computerInfoHandler))
+	http.HandleFunc("/sysstats", sysStatsHandler)
+	http.HandleFunc("/platform", computerInfoHandler)
 
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }

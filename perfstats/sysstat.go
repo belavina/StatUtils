@@ -13,11 +13,12 @@ type SysStat struct {
 }
 
 // GetPlatformInfo show platform details
-func GetPlatformInfo() (map[string]string, error) {
+func GetPlatformInfo() (interface{}, error) {
 
 	hostname, _ := os.Hostname()
-	return map[string]string{
+	machineDetails := map[string]string{
 		"platform": runtime.GOOS,
 		"machine":  hostname,
-	}, nil
+	}
+	return machineDetails, nil
 }

@@ -2,6 +2,7 @@ package perfstats
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -167,7 +168,7 @@ func getMemoryStats() SysStat {
 }
 
 // PlatformSysStats Query performance stats on linux platform
-func PlatformSysStats() ([]SysStat, error) {
+func PlatformSysStats() (interface{}, error) {
 
 	var stats []SysStat
 	stats = append(stats, getCPUStats()...)
@@ -179,5 +180,5 @@ func PlatformSysStats() ([]SysStat, error) {
 	// 	fmt.Println(err)
 	// }
 
-	return stats, nil
+	return stats, errors.New("bad bad error")
 }

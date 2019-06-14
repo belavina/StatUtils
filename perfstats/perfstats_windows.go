@@ -59,6 +59,6 @@ func queryWindowsSysStats() []byte {
 	return out
 }
 
-func PlatformSysStats() ([]SysStat, error) {
+func PlatformSysStats() (interface{}, error) {
 	return sysStatCSVToSysStat(queryWindowsSysStats()), nil
 }
