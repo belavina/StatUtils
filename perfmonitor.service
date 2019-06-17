@@ -2,7 +2,7 @@
 Description=Perfmonitor tool collecting system performance
 
 [Service]
-Type=idle
+Type=simple
 Restart=always
 RestartSec=3
 ExecStart=/usr/bin/perfmonitor
