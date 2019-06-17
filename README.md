@@ -24,22 +24,26 @@ data is returned in the following JSON format (this is windows example, Keys won
 
 ```javascript
 [  
-   {  
-      "Date":"6/9/2019 10:16:39 PM",
-      "Key":"\\\\pc-name\\logicaldisk(q:)\\% free space",
-      "Value":"60.1844908902267"
-   },
-   {  
-      "Date":"6/9/2019 10:16:39 PM",
-      "Key":"\\\\pc-name\\processor information(0,0)\\% processor time",
-      "Value":"17.484500998004"
-   },
-   {  
-      "Date":"6/9/2019 10:16:39 PM",
-      "Key":"\\\\pc-name\\memory\\available bytes",
-      "Value":"3154997248"
-   }
-   ...
+   "status": "success",
+   "message": "",
+   "data": [
+      {  
+         "Date":"6/9/2019 10:16:39 PM",
+         "Key":"\\\\pc-name\\logicaldisk(q:)\\% free space",
+         "Value":"60.1844908902267"
+      },
+      {  
+         "Date":"6/9/2019 10:16:39 PM",
+         "Key":"\\\\pc-name\\processor information(0,0)\\% processor time",
+         "Value":"17.484500998004"
+      },
+      {  
+         "Date":"6/9/2019 10:16:39 PM",
+         "Key":"\\\\pc-name\\memory\\available bytes",
+         "Value":"3154997248"
+      }
+      ...
+   ]
 ]
 ```
 
@@ -51,8 +55,12 @@ $ curl -i "http://{{vm_host}}:9159/platform"
 
 ```javascript
 {
-   "machine":"my.hostname",
-   "platform":"linux" // or "windows"
+   "status": "success",
+   "message": "",
+   "data": {
+      "machine":"my.hostname",
+      "platform":"linux" // or "windows"
+   }
 }
 ```
 

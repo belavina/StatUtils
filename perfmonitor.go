@@ -23,12 +23,12 @@ type response struct {
 	Message string      `json:"message"`
 }
 
-type getData func() (interface{}, error)
+type getResponseData func() (interface{}, error)
 
-func processRequest(w http.ResponseWriter, f getData) {
+func processRequest(w http.ResponseWriter, getData getResponseData) {
 	w.Header().Set("Content-Type", "application/json")
 
-	data, err := f()
+	data, err := getData()
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
