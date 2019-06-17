@@ -23,28 +23,28 @@ $ curl -i "http://{{vm_host}}:9159/sysstats"
 data is returned in the following JSON format (this is windows example, Keys won't match the linux output):
 
 ```javascript
-[  
+{
    "status": "success",
    "message": "",
    "data": [
       {  
-         "Date":"6/9/2019 10:16:39 PM",
-         "Key":"\\\\pc-name\\logicaldisk(q:)\\% free space",
-         "Value":"60.1844908902267"
+         "date":"6/9/2019 10:16:39 PM",
+         "key":"\\\\pc-name\\logicaldisk(q:)\\% free space",
+         "value":"60.1844908902267"
       },
       {  
-         "Date":"6/9/2019 10:16:39 PM",
-         "Key":"\\\\pc-name\\processor information(0,0)\\% processor time",
-         "Value":"17.484500998004"
+         "date":"6/9/2019 10:16:39 PM",
+         "key":"\\\\pc-name\\processor information(0,0)\\% processor time",
+         "value":"17.484500998004"
       },
       {  
-         "Date":"6/9/2019 10:16:39 PM",
-         "Key":"\\\\pc-name\\memory\\available bytes",
-         "Value":"3154997248"
+         "date":"6/9/2019 10:16:39 PM",
+         "key":"\\\\pc-name\\memory\\available bytes",
+         "value":"3154997248"
       }
       ...
    ]
-]
+}
 ```
 
 You can find os of the vm `perfmonitor` is running on by querying:
