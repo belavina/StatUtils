@@ -73,8 +73,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	perfstats.GetDiskStats()
-
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 

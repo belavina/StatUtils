@@ -171,7 +171,7 @@ func getMemoryStats() (StatEntry, error) {
 
 func GetDiskStats() (StatEntry, error) {
 	var statEntry StatEntry
-	// var diskStats []map[string][]string
+	diskStats := make(map[string][]string)
 
 	statEntry.Date = getDateFormatted()
 
@@ -185,9 +185,12 @@ func GetDiskStats() (StatEntry, error) {
 	// headers := strings.Fields(lines[0])
 
 	for _, line := range lines[1:] {
-		// diskStats = append(diskStats, map)
-		fmt.Println(line)
+		tokens := strings.Fields(line)
+		fmt.Println(tokens)
+		diskStats[tokens[0]] = tokens
 	}
+
+	statEntry.Stats = diskStats
 
 	return statEntry, nil
 }
@@ -203,9 +206,14 @@ func PlatformSysStats() (interface{}, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Cannot get CPU details: %s", err)
 	}
+	diskInfo, err := GetDiskStats()
+	if err != nil {
+		return nil, fmt.Errorf("Cannot get disk details: %s", err)
+	}
 
 	return SysStat{
 		Memory: memInfo,
 		CPU:    cpuInfo,
+		Disk:   diskInfo,
 	}, nil
 }
