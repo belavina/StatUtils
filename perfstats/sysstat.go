@@ -5,11 +5,17 @@ import (
 	"runtime"
 )
 
+// StatEntry specific performance data sweep
+type StatEntry struct {
+	Stats interface{} `json:"stats"`
+	Date  string      `json:"date"`
+}
+
 // SysStat Performance statistics
 type SysStat struct {
-	Date  string `json:"date"`
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	CPU    StatEntry `json:"cpu"`
+	Disk   StatEntry `json:"disk"`
+	Memory StatEntry `json:"memory"`
 }
 
 // GetPlatformInfo show platform details

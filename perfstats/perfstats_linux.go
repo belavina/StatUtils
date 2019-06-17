@@ -107,21 +107,22 @@ func computeActiveTotalCPU(procStats map[string][]float64) (map[string]float64, 
 }
 
 // compute CPU utilization by getting 2 samples and calculating delta between them
-func getCPUStats() ([]SysStat, error) {
+func getCPUStats() (StatEntry, error) {
 
 	// based on:
 	// https://stackoverflow.com/questions/26791240/how-to-get-percentage-of-processor-use-with-bash
 
-	var sysStats []SysStat
-	var statEntry SysStat
+	var cpuStats StatEntry
+	var stats []map[string]string
 
-	dateFormatted := getDateFormatted()
+	cpuStats.Date = getDateFormatted()
+
 	timeBetweenSamples := 2 * time.Second
 
 	// sample 2 stats with a time-delay in between
 	procStatOne, err := parseProcStat()
 	if err != nil {
-		return sysStats, err
+		return cpuStats, err
 	}
 	activeOne, totalOne := computeActiveTotalCPU(procStatOne)
 	time.Sleep(timeBetweenSamples)
@@ -133,20 +134,18 @@ func getCPUStats() ([]SysStat, error) {
 		cpuUtilization := (100 * (activeTwo[cpuName] - activeOne[cpuName]) /
 			(totalTwo[cpuName] - totalOne[cpuName]))
 
+		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
-		statEntry.Date = dateFormatted
-		statEntry.Key = cpuName
-		statEntry.Value = strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
-
-		sysStats = append(sysStats, statEntry)
+		stats = append(stats, map[string]string{cpuName: fmtUtilization})
 	}
 
-	return sysStats, nil
+	cpuStats.Stats = stats
+	return cpuStats, nil
 }
 
-func getMemoryStats() (SysStat, error) {
+func getMemoryStats() (StatEntry, error) {
 
-	var memStat SysStat
+	var memStat StatEntry
 
 	const (
 		header = iota
@@ -165,16 +164,32 @@ func getMemoryStats() (SysStat, error) {
 	memInfo := strings.Fields(strings.Split(string(out[:]), "\n")[memory])[1:]
 
 	memStat.Date = getDateFormatted()
-	memStat.Key = "Memory Available"
-	memStat.Value = memInfo[memoryAvailable]
+	memStat.Stats = map[string]string{"Memory Available": memInfo[memoryAvailable]}
 
 	return memStat, nil
 }
 
+func GetDiskStats() (StatEntry, error) {
+	var diskStats StatEntry
+	diskStats.Date = getDateFormatted()
+
+	cmdResult := exec.Command("df")
+	out, err := cmdResult.Output()
+	if err != nil {
+		return diskStats, err
+	}
+
+	lines := strings.Split(string(out[:]), "\n")
+	// headers := strings.Fields(lines[0])
+	for _, line := range lines[1:] {
+		fmt.Println(line)
+	}
+
+	return diskStats, nil
+}
+
 // PlatformSysStats Query performance stats on linux platform
 func PlatformSysStats() (interface{}, error) {
-
-	var stats []SysStat
 
 	memInfo, err := getMemoryStats()
 	if err != nil {
@@ -185,8 +200,8 @@ func PlatformSysStats() (interface{}, error) {
 		return nil, fmt.Errorf("Cannot get CPU details: %s", err)
 	}
 
-	stats = append(stats, memInfo)
-	stats = append(stats, cpuInfo...)
-
-	return stats, nil
+	return SysStat{
+		Memory: memInfo,
+		CPU:    cpuInfo,
+	}, nil
 }
