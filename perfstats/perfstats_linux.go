@@ -112,17 +112,17 @@ func getCPUStats() (StatEntry, error) {
 	// based on:
 	// https://stackoverflow.com/questions/26791240/how-to-get-percentage-of-processor-use-with-bash
 
-	var cpuStats StatEntry
-	var stats []map[string]string
+	var statEntry StatEntry
+	cpuStats := make(map[string]string)
 
-	cpuStats.Date = getDateFormatted()
+	statEntry.Date = getDateFormatted()
 
 	timeBetweenSamples := 2 * time.Second
 
 	// sample 2 stats with a time-delay in between
 	procStatOne, err := parseProcStat()
 	if err != nil {
-		return cpuStats, err
+		return statEntry, err
 	}
 	activeOne, totalOne := computeActiveTotalCPU(procStatOne)
 	time.Sleep(timeBetweenSamples)
@@ -136,11 +136,11 @@ func getCPUStats() (StatEntry, error) {
 
 		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
-		stats = append(stats, map[string]string{cpuName: fmtUtilization})
+		cpuStats[cpuName] = fmtUtilization
 	}
 
-	cpuStats.Stats = stats
-	return cpuStats, nil
+	statEntry.Stats = cpuStats
+	return statEntry, nil
 }
 
 func getMemoryStats() (StatEntry, error) {
@@ -170,22 +170,26 @@ func getMemoryStats() (StatEntry, error) {
 }
 
 func GetDiskStats() (StatEntry, error) {
-	var diskStats StatEntry
-	diskStats.Date = getDateFormatted()
+	var statEntry StatEntry
+	// var diskStats []map[string][]string
+
+	statEntry.Date = getDateFormatted()
 
 	cmdResult := exec.Command("df")
 	out, err := cmdResult.Output()
 	if err != nil {
-		return diskStats, err
+		return statEntry, err
 	}
 
 	lines := strings.Split(string(out[:]), "\n")
 	// headers := strings.Fields(lines[0])
+
 	for _, line := range lines[1:] {
+		// diskStats = append(diskStats, map)
 		fmt.Println(line)
 	}
 
-	return diskStats, nil
+	return statEntry, nil
 }
 
 // PlatformSysStats Query performance stats on linux platform
