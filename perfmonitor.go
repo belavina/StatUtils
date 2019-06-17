@@ -15,7 +15,7 @@ import (
 )
 
 // AppVersion - current app version
-const AppVersion = "0.0.1"
+const AppVersion = "0.1.0"
 
 type response struct {
 	Status  string      `json:"status"`
@@ -23,12 +23,14 @@ type response struct {
 	Message string      `json:"message"`
 }
 
-type getResponseData func() (interface{}, error)
+type appHandler func(http.ResponseWriter, *http.Request) (interface{}, error)
 
-func processRequest(w http.ResponseWriter, getData getResponseData) {
+// implement the http.Handler interface's ServeHTTP to add error handling
+// and uniform json response format
+func (getData appHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	data, err := getData()
+	data, err := getData(w, r)
 
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -49,13 +51,13 @@ func processRequest(w http.ResponseWriter, getData getResponseData) {
 }
 
 // Processes http request for latest system performance statistics
-func sysStatsHandler(w http.ResponseWriter, r *http.Request) {
-	processRequest(w, perfstats.PlatformSysStats)
+func sysStatsHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	return perfstats.PlatformSysStats()
 }
 
 // Get host details such as platform & hostname
-func computerInfoHandler(w http.ResponseWriter, r *http.Request) {
-	processRequest(w, perfstats.GetPlatformInfo)
+func computerInfoHandler(w http.ResponseWriter, r *http.Request) (interface{}, error) {
+	return perfstats.GetPlatformInfo()
 }
 
 func main() {
@@ -75,8 +77,8 @@ func main() {
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
 	// http routes:
-	http.HandleFunc("/sysstats", sysStatsHandler)
-	http.HandleFunc("/platform", computerInfoHandler)
+	http.Handle("/sysstats", appHandler(sysStatsHandler))
+	http.Handle("/platform", appHandler(computerInfoHandler))
 
 	http.ListenAndServe(fmt.Sprintf(":%d", *httpPortPtr), nil)
 }
