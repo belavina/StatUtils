@@ -83,7 +83,7 @@ The .exe can be built for windows (on linux) as:
 
 Or it can be compiled on windows as:
 
-`$env:GOOS="windows; $env:GOARCH="amd64";C:\Go\bin\go build -o perfmonitor.exe`
+`$env:GOOS="windows"; $env:GOARCH="amd64";C:\Go\bin\go build -o perfmonitor.exe`
 
 Linux executable can be created with the following command:
 
