@@ -8,11 +8,11 @@ import (
 	"os/exec"
 )
 
-// Convert sysStat in csv format to json
-func sysStatCSVToSysStat(cmdOut []byte) ([]SysStat, error) {
+// Convert sysStat in csv format to map
+func csvToMap(cmdOut []byte) ([]map[string]string, error) {
 
-	var statEntry SysStat
-	var stats []SysStat
+	// var statEntry SysStat
+	var stats []map[string]string
 
 	reader := csv.NewReader(bytes.NewReader(cmdOut))
 	reader.FieldsPerRecord = -1
@@ -27,41 +27,51 @@ func sysStatCSVToSysStat(cmdOut []byte) ([]SysStat, error) {
 		return stats, errors.New("CSV data is empty")
 	}
 
-	for _, each := range csvData[1:] {
-		statEntry.Date = each[0]
-		statEntry.Key = each[1]
-		statEntry.Value = each[2]
+	headers := csvData[0]
 
+	for _, each := range csvData[1:] {
+
+		statEntry := make(map[string]string)
+		for i := range headers {
+			statEntry[headers[i]] = each[i]
+		}
 		stats = append(stats, statEntry)
 	}
 
 	return stats, nil
 }
 
-// Query performance stats on windows platform
-func queryWindowsSysStats() ([]byte, error) {
+func getPerfCounter(counterName string) (StatEntry, error) {
+	var statEntry StatEntry
+	statEntry.Date = getDateFormatted()
 
-	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-file", "./SysStats.ps1")
+	getCounterFmt := "& {Get-Counter -Counter \"%s\" | Select-Object -ExpandProperty CounterSamples | convertto-csv -NoTypeInformation}"
+	getCounter := fmt.Sprintf(getCounterFmt, counterName)
+	cmdResult := exec.Command("powershell.exe", "-Command", getCounter)
 
 	out, err := cmdResult.Output()
+
 	if err != nil {
-		return nil, err
+		return statEntry, err
 	}
 
-	return out, nil
+	// Convert to csv
+	statEntry.Stats, err = csvToMap(out)
+	if err != nil {
+		return statEntry, err
+	}
+
+	return statEntry, nil
 }
 
-func PlatformSysStats() (interface{}, error) {
+func getCPUStats() (StatEntry, error) {
+	return getPerfCounter("\\Processor Information(*)\\% Processor Time")
+}
 
-	csvOutput, err := queryWindowsSysStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get windows system performance details: %s", err)
-	}
+func getDiskStats() (StatEntry, error) {
+	return getPerfCounter("\\LogicalDisk(*)\\% Free Space")
+}
 
-	winStats, err := sysStatCSVToSysStat(csvOutput)
-	if err != nil {
-		return nil, fmt.Errorf("Cannot parse SysStats ps .csv: output %s", err)
-	}
-
-	return winStats, nil
+func getMemoryStats() (StatEntry, error) {
+	return getPerfCounter("\\Memory\\Available Bytes")
 }

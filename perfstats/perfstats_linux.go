@@ -78,12 +78,6 @@ func parseProcStat() (map[string][]float64, error) {
 	return cpuStats, nil
 }
 
-func getDateFormatted() string {
-	// match date format returned by win
-	dt := time.Now()
-	return dt.Format("1/2/2006 3:04:05 PM")
-}
-
 // compute active and total CPU utilizations from proc/stat readings
 func computeActiveTotalCPU(procStats map[string][]float64) (map[string]float64, map[string]float64) {
 
@@ -169,7 +163,7 @@ func getMemoryStats() (StatEntry, error) {
 	return memStat, nil
 }
 
-func GetDiskStats() (StatEntry, error) {
+func getDiskStats() (StatEntry, error) {
 	var statEntry StatEntry
 	diskStats := make(map[string][]string)
 
@@ -193,27 +187,4 @@ func GetDiskStats() (StatEntry, error) {
 	statEntry.Stats = diskStats
 
 	return statEntry, nil
-}
-
-// PlatformSysStats Query performance stats on linux platform
-func PlatformSysStats() (interface{}, error) {
-
-	memInfo, err := getMemoryStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get memory details: %s", err)
-	}
-	cpuInfo, err := getCPUStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get CPU details: %s", err)
-	}
-	diskInfo, err := GetDiskStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get disk details: %s", err)
-	}
-
-	return SysStat{
-		Memory: memInfo,
-		CPU:    cpuInfo,
-		Disk:   diskInfo,
-	}, nil
 }

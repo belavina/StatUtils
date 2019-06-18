@@ -72,7 +72,6 @@ func main() {
 		fmt.Println(AppVersion)
 		os.Exit(0)
 	}
-
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 
