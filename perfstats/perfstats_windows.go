@@ -9,10 +9,9 @@ import (
 )
 
 // Convert sysStat in csv format to map
-func csvToMap(cmdOut []byte) ([]map[string]string, error) {
+func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 
-	// var statEntry SysStat
-	var stats []map[string]string
+	var parsedCsv []map[string]string
 
 	reader := csv.NewReader(bytes.NewReader(cmdOut))
 	reader.FieldsPerRecord = -1
@@ -20,25 +19,25 @@ func csvToMap(cmdOut []byte) ([]map[string]string, error) {
 	csvData, err := reader.ReadAll()
 
 	if err != nil {
-		return stats, fmt.Errorf("Error while parsing .csv script output: %s", err)
+		return parsedCsv, fmt.Errorf("Error while parsing .csv script output: %s", err)
 	}
 
 	if csvData == nil {
-		return stats, errors.New("CSV data is empty")
+		return parsedCsv, errors.New("CSV data is empty")
 	}
 
 	headers := csvData[0]
 
 	for _, each := range csvData[1:] {
 
-		statEntry := make(map[string]string)
+		csvEntry := make(map[string]string)
 		for i := range headers {
-			statEntry[headers[i]] = each[i]
+			csvEntry[headers[i]] = each[i]
 		}
-		stats = append(stats, statEntry)
+		parsedCsv = append(parsedCsv, csvEntry)
 	}
 
-	return stats, nil
+	return parsedCsv, nil
 }
 
 func getPerfCounter(counterName string) (StatEntry, error) {
@@ -56,7 +55,7 @@ func getPerfCounter(counterName string) (StatEntry, error) {
 	}
 
 	// Convert to csv
-	statEntry.Stats, err = csvToMap(out)
+	statEntry.Stats, err = parseCSVOutput(out)
 	if err != nil {
 		return statEntry, err
 	}

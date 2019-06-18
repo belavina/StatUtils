@@ -2,7 +2,6 @@ package perfstats
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -107,7 +106,7 @@ func getCPUStats() (StatEntry, error) {
 	// https://stackoverflow.com/questions/26791240/how-to-get-percentage-of-processor-use-with-bash
 
 	var statEntry StatEntry
-	cpuStats := make(map[string]string)
+	var cpuStats []map[string]string
 
 	statEntry.Date = getDateFormatted()
 
@@ -130,17 +129,22 @@ func getCPUStats() (StatEntry, error) {
 
 		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
-		cpuStats[cpuName] = fmtUtilization
+		cpuStats = append(cpuStats, map[string]string{
+			"cpuName":     cpuName,
+			"utilization": fmtUtilization,
+		})
 	}
 
 	statEntry.Stats = cpuStats
 	return statEntry, nil
 }
 
+// Find out memory usage with free
 func getMemoryStats() (StatEntry, error) {
 
 	var memStat StatEntry
 
+	// free output rows:
 	const (
 		header = iota
 		memory = iota
@@ -165,7 +169,7 @@ func getMemoryStats() (StatEntry, error) {
 
 func getDiskStats() (StatEntry, error) {
 	var statEntry StatEntry
-	diskStats := make(map[string][]string)
+	var diskStats []map[string]string
 
 	statEntry.Date = getDateFormatted()
 
@@ -176,12 +180,22 @@ func getDiskStats() (StatEntry, error) {
 	}
 
 	lines := strings.Split(string(out[:]), "\n")
-	// headers := strings.Fields(lines[0])
+	headers := strings.Fields(lines[0])
+	// drop "on" part from tokenized "Mounted on"
+	headers = headers[:len(headers)-1]
 
 	for _, line := range lines[1:] {
 		tokens := strings.Fields(line)
-		fmt.Println(tokens)
-		diskStats[tokens[0]] = tokens
+
+		if len(tokens) != len(headers) {
+			continue
+		}
+
+		lineMap := make(map[string]string)
+		for i := range headers {
+			lineMap[headers[i]] = tokens[i]
+		}
+		diskStats = append(diskStats, lineMap)
 	}
 
 	statEntry.Stats = diskStats

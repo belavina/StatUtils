@@ -21,8 +21,7 @@ type SysStat struct {
 }
 
 func getDateFormatted() string {
-	dt := time.Now()
-	return dt.Format("1/2/2006 3:04:05 PM")
+	return time.Now().UTC().Format("20060102150405")
 }
 
 // GetPlatformInfo show platform details
