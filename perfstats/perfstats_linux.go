@@ -108,8 +108,6 @@ func getCPUStats() (StatEntry, error) {
 	var statEntry StatEntry
 	var cpuStats []map[string]string
 
-	statEntry.Date = getDateFormatted()
-
 	timeBetweenSamples := 2 * time.Second
 
 	// sample 2 stats with a time-delay in between
@@ -135,6 +133,7 @@ func getCPUStats() (StatEntry, error) {
 		})
 	}
 
+	statEntry.Date = getDateFormatted()
 	statEntry.Stats = cpuStats
 	return statEntry, nil
 }
@@ -143,6 +142,7 @@ func getCPUStats() (StatEntry, error) {
 func getMemoryStats() (StatEntry, error) {
 
 	var memStat StatEntry
+	var memStats []map[string]string
 
 	// free output rows:
 	const (
@@ -162,7 +162,9 @@ func getMemoryStats() (StatEntry, error) {
 	memInfo := strings.Fields(strings.Split(string(out[:]), "\n")[memory])[1:]
 
 	memStat.Date = getDateFormatted()
-	memStat.Stats = map[string]string{"Memory Available": memInfo[memoryAvailable]}
+	memStat.Stats = append(
+		memStats,
+		map[string]string{"Memory Available": memInfo[memoryAvailable]})
 
 	return memStat, nil
 }

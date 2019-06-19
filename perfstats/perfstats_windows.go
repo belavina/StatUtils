@@ -8,7 +8,7 @@ import (
 	"os/exec"
 )
 
-// Convert sysStat in csv format to map
+// Convert csv to array of maps
 func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 
 	var parsedCsv []map[string]string
@@ -40,10 +40,12 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 	return parsedCsv, nil
 }
 
+// Query windows counters with powershell command
 func getPerfCounter(counterName string) (StatEntry, error) {
 	var statEntry StatEntry
 	statEntry.Date = getDateFormatted()
 
+	// Run powershell command returning a performance counter
 	getCounterFmt := "& {Get-Counter -Counter \"%s\" | Select-Object -ExpandProperty CounterSamples | convertto-csv -NoTypeInformation}"
 	getCounter := fmt.Sprintf(getCounterFmt, counterName)
 	cmdResult := exec.Command("powershell.exe", "-Command", getCounter)
