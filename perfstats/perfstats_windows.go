@@ -55,7 +55,7 @@ func getPerfCounter(counterName string) (StatEntry, error) {
 	// Run powershell command returning a performance counter
 	getCounterFmt := "& {Get-Counter -Counter \"%s\" | Select-Object -ExpandProperty CounterSamples | convertto-csv -NoTypeInformation}"
 	getCounter := fmt.Sprintf(getCounterFmt, counterName)
-	cmdResult := exec.Command("powershell.exe", "-Command", getCounter)
+	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-Command", getCounter)
 
 	out, err := cmdResult.Output()
 
