@@ -8,6 +8,9 @@ import (
 	"time"
 )
 
+// AppVersion - current app version
+const AppVersion = "0.2.0"
+
 // StatEntry specific performance data sweep
 type StatEntry struct {
 	Stats interface{} `json:"stats"`
@@ -36,8 +39,9 @@ func GetPlatformInfo() (interface{}, error) {
 
 	hostname, _ := os.Hostname()
 	machineDetails := map[string]string{
-		"platform": runtime.GOOS,
-		"machine":  hostname,
+		"platform":        runtime.GOOS,
+		"machine":         hostname,
+		"softwareVersion": AppVersion,
 	}
 	return machineDetails, nil
 }

@@ -20,30 +20,127 @@ Current performance stats can be accessed at HTTP port `:9159` & route `/sysstat
 $ curl -i "http://{{vm_host}}:9159/sysstats"
 ```
 
-data is returned in the following JSON format (this is windows example, Keys won't match the linux output):
+On both platforms, `value` for a specific hardware group indicates performance measure in the following format:
+
+- `cpu`: % Processor Time is the percentage of elapsed time that the processor spends to execute a non-Idle thread (CPU Utilization, see [Microsoft Docs](https://social.technet.microsoft.com/wiki/contents/articles/12984.understanding-processor-processor-time-and-process-processor-time.aspx))
+- `disk`: Percentage available of total storage space
+- `memory`: Memory Available in Bytes
+
+For windows, `instanceName` indicates cpu instance or disk name if applicable;
 
 ```javascript
 {
    "status": "success",
    "message": "",
-   "data": [
-      {  
-         "date":"6/9/2019 10:16:39 PM",
-         "key":"\\\\pc-name\\logicaldisk(q:)\\% free space",
-         "value":"60.1844908902267"
+   "data": {
+      "cpu": {
+         "stats": [
+            {
+               "counterType": "Timer100NsInverse",
+               "defaultScale": "0",
+               "instanceName": "_total",
+               "multipleCount": "1",
+               "path": "\\\\desktop-fo9p270\\processor information(_total)\\% processor time",
+               "rawValue": "689984375000",
+               "secondValue": "132054295798539933",
+               "status": "0",
+               "timeBase": "10000000",
+               "timestamp": "6\/19\/2019 10:52:59 AM",
+               "timestamp100NSec": "132054151798539933",
+               "value": "9.41475786277403"
+            }
+            { ... }
+         ],
+         "date": "20190619145258" // UNIX timestamp in UTC
       },
-      {  
-         "date":"6/9/2019 10:16:39 PM",
-         "key":"\\\\pc-name\\processor information(0,0)\\% processor time",
-         "value":"17.484500998004"
+      "disk": {
+         "stats": [
+            {
+               "counterType": "RawFraction",
+               "defaultScale": "0",
+               "instanceName": "harddiskvolume1",
+               "multipleCount": "1",
+               "path": "\\\\desktop-fo9p270\\logicaldisk(harddiskvolume1)\\% free space",
+               "rawValue": "175",
+               "secondValue": "578",
+               "status": "0",
+               "timeBase": "10000000",
+               "timestamp": "6\/19\/2019 10:53:01 AM",
+               "timestamp100NSec": "132054151816460000",
+               "value": "30.2768166089965"
+            },
+            { ... }
+        ],
+         "date": "20190619145256"
       },
-      {  
-         "date":"6/9/2019 10:16:39 PM",
-         "key":"\\\\pc-name\\memory\\available bytes",
-         "value":"3154997248"
+      "memory": {
+         "stats": [
+            {
+               "counterType": "NumberOfItems64",
+               "defaultScale": "4294967290",
+               "instanceName": "",
+               "multipleCount": "1",
+               "path": "\\\\desktop-fo9p270\\memory\\available bytes",
+               "rawValue": "1515257856",
+               "secondValue": "0",
+               "status": "0",
+               "timeBase": "10000000",
+               "timestamp": "6\/19\/2019 10:52:58 AM",
+               "timestamp100NSec": "132054151780150000",
+               "value": "1515257856"
+            }
+         ],
+         "date": "20190619145256"
       }
-      ...
-   ]
+   }
+}
+```
+
+Identification of hardware devices on linux differs from the windows output (for example, `cpuName` for cpu stats along with a combination of `filesystem` and `mounted` can be used). Note that disk query reports slightly modified `df` command output and you will need to filter out some filesystems. 
+
+
+```javascript
+{
+   "status": "success",
+   "message": "",
+   "data": {
+      "cpu": {
+         "stats": [
+            {
+               "cpuName": "cpu1",
+               "value": "7.575758",
+               "valueType": "% CPU Utilization"
+            },
+            { ... }
+         ],
+         "date": "20190619145258"
+      },
+      "disk": {
+         "stats": [
+            {
+               "1K-blocks": "224021164",
+               "available": "171205740",
+               "filesystem": "/dev/mapper/fedora_localhost--live-home",
+               "mounted": "/home",
+               "use%": "20%",
+               "used": "41366080",
+               "value": "80.540186",
+               "valueType": "Space Available"
+            },
+            { ... }
+        ],
+         "date": "20190619145256"
+      },
+      "memory": {
+         "stats": [
+            {
+               "value": "22358220800",
+               "valueType": "Memory Available (bytes)"
+            }
+         ],
+         "date": "20190619145256"
+      }
+   }
 }
 ```
 
@@ -59,7 +156,8 @@ $ curl -i "http://{{vm_host}}:9159/platform"
    "message": "",
    "data": {
       "machine":"my.hostname",
-      "platform":"linux" // or "windows"
+      "platform":"linux", // or "windows"
+      "softwareVersion": "0.2.0" // perfmonitor version
    }
 }
 ```
