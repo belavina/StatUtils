@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -20,8 +21,14 @@ type SysStat struct {
 	Memory StatEntry `json:"memory"`
 }
 
+// Web API date format (utc timestamp)
 func getDateFormatted() string {
 	return time.Now().UTC().Format("20060102150405")
+}
+
+// Lowers only the first character in a string
+func lowerFirst(str string) string {
+	return strings.ToLower(string(str[0])) + str[1:]
 }
 
 // GetPlatformInfo show platform details

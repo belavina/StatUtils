@@ -128,8 +128,9 @@ func getCPUStats() (StatEntry, error) {
 		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
 		cpuStats = append(cpuStats, map[string]string{
-			"cpuName":     cpuName,
-			"utilization": fmtUtilization,
+			"cpuName":   cpuName,
+			"value":     fmtUtilization,
+			"valueType": "% CPU Utilization",
 		})
 	}
 
@@ -164,9 +165,20 @@ func getMemoryStats() (StatEntry, error) {
 	memStat.Date = getDateFormatted()
 	memStat.Stats = append(
 		memStats,
-		map[string]string{"Memory Available": memInfo[memoryAvailable]})
+		map[string]string{
+			"value":     memInfo[memoryAvailable],
+			"valueType": "Memory Available (bytes)",
+		})
 
 	return memStat, nil
+}
+
+// Free returns usage%, get available % to match windows counter output
+func getSpaceAvailablePercentage(diskMap map[string]string) string {
+	availableSpace, _ := strconv.ParseFloat(diskMap["available"], 64)
+	usedSpace, _ := strconv.ParseFloat(diskMap["used"], 64)
+
+	return strconv.FormatFloat(availableSpace*100/(availableSpace+usedSpace), 'f', 6, 64)
 }
 
 func getDiskStats() (StatEntry, error) {
@@ -195,8 +207,12 @@ func getDiskStats() (StatEntry, error) {
 
 		lineMap := make(map[string]string)
 		for i := range headers {
+			headers[i] = lowerFirst(headers[i])
 			lineMap[headers[i]] = tokens[i]
 		}
+
+		lineMap["valueType"] = "Space Available"
+		lineMap["value"] = getSpaceAvailablePercentage(lineMap)
 		diskStats = append(diskStats, lineMap)
 	}
 
