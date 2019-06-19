@@ -35,7 +35,8 @@ func GetPlatformInfo() (interface{}, error) {
 	return machineDetails, nil
 }
 
-// PlatformSysStats Query performance stats on linux platform
+// PlatformSysStats Query performance stats
+// (calls either _linux.go or _windows perfstats implementations)
 func PlatformSysStats() (interface{}, error) {
 
 	memInfo, err := getMemoryStats()

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // Convert csv to array of maps
@@ -27,6 +28,13 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 	}
 
 	headers := csvData[0]
+	// lowercase first letter
+	for idx, header := range headers {
+		if header == "CookedValue" {
+			header = "value"
+		}
+		headers[idx] = strings.ToLower(string(header[0])) + header[1:]
+	}
 
 	for _, each := range csvData[1:] {
 
