@@ -27,7 +27,7 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 	}
 
 	headers := csvData[0]
-	// lowercase first letter
+	// lowercase first letter and match value format with other platforms
 	for idx, header := range headers {
 		if header == "CookedValue" {
 			header = "value"
@@ -35,6 +35,7 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 		headers[idx] = lowerFirst(header)
 	}
 
+	// parse rows of .csv data
 	for _, each := range csvData[1:] {
 
 		csvEntry := make(map[string]string)
@@ -50,7 +51,6 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 // Query windows counters with powershell command
 func getPerfCounter(counterName string) (StatEntry, error) {
 	var statEntry StatEntry
-	statEntry.Date = getDateFormatted()
 
 	// Run powershell command returning a performance counter
 	getCounterFmt := "& {Get-Counter -Counter \"%s\" | Select-Object -ExpandProperty CounterSamples | convertto-csv -NoTypeInformation}"

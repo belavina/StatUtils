@@ -134,7 +134,6 @@ func getCPUStats() (StatEntry, error) {
 		})
 	}
 
-	statEntry.Date = getDateFormatted()
 	statEntry.Stats = cpuStats
 	return statEntry, nil
 }
@@ -142,7 +141,7 @@ func getCPUStats() (StatEntry, error) {
 // Find out memory usage with free
 func getMemoryStats() (StatEntry, error) {
 
-	var memStat StatEntry
+	var statEntry StatEntry
 	var memStats []map[string]string
 
 	// free output rows:
@@ -156,21 +155,20 @@ func getMemoryStats() (StatEntry, error) {
 
 	out, err := cmdResult.Output()
 	if err != nil {
-		return memStat, err
+		return statEntry, err
 	}
 
 	// get total, used, free etc. (discard first token sicne it's a label "Mem:")
 	memInfo := strings.Fields(strings.Split(string(out[:]), "\n")[memory])[1:]
 
-	memStat.Date = getDateFormatted()
-	memStat.Stats = append(
+	statEntry.Stats = append(
 		memStats,
 		map[string]string{
 			"value":     memInfo[memoryAvailable],
 			"valueType": "Memory Available (bytes)",
 		})
 
-	return memStat, nil
+	return statEntry, nil
 }
 
 // Free returns usage%, get available % to match windows counter output
@@ -185,8 +183,6 @@ func getDiskStats() (StatEntry, error) {
 	var statEntry StatEntry
 	var diskStats []map[string]string
 
-	statEntry.Date = getDateFormatted()
-
 	cmdResult := exec.Command("df")
 	out, err := cmdResult.Output()
 	if err != nil {
@@ -195,9 +191,15 @@ func getDiskStats() (StatEntry, error) {
 
 	lines := strings.Split(string(out[:]), "\n")
 	headers := strings.Fields(lines[0])
-	// drop "on" part from tokenized "Mounted on"
-	headers = headers[:len(headers)-1]
 
+	// drop "on" part from tokenized "Mounted on"
+	// and change header format from initcap to camel
+	headers = headers[:len(headers)-1]
+	for i := range headers {
+		headers[i] = lowerFirst(headers[i])
+	}
+
+	// parse disks/filesystems
 	for _, line := range lines[1:] {
 		tokens := strings.Fields(line)
 
@@ -207,7 +209,6 @@ func getDiskStats() (StatEntry, error) {
 
 		lineMap := make(map[string]string)
 		for i := range headers {
-			headers[i] = lowerFirst(headers[i])
 			lineMap[headers[i]] = tokens[i]
 		}
 
@@ -217,6 +218,5 @@ func getDiskStats() (StatEntry, error) {
 	}
 
 	statEntry.Stats = diskStats
-
 	return statEntry, nil
 }

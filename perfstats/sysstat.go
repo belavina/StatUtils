@@ -24,6 +24,8 @@ type SysStat struct {
 	Memory StatEntry `json:"memory"`
 }
 
+type statGetter func() (StatEntry, error)
+
 // Web API date format (utc timestamp)
 func getDateFormatted() string {
 	return time.Now().UTC().Format("20060102150405")
@@ -37,35 +39,38 @@ func lowerFirst(str string) string {
 // GetPlatformInfo show platform details
 func GetPlatformInfo() (interface{}, error) {
 
-	hostname, _ := os.Hostname()
+	hostname, err := os.Hostname()
 	machineDetails := map[string]string{
 		"platform":        runtime.GOOS,
 		"machine":         hostname,
 		"softwareVersion": AppVersion,
 	}
-	return machineDetails, nil
+	return machineDetails, err
 }
 
 // PlatformSysStats Query performance stats
 // (calls either _linux.go or _windows perfstats implementations)
 func PlatformSysStats() (interface{}, error) {
 
-	memInfo, err := getMemoryStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get memory details: %s", err)
+	statEntries := make(map[string]StatEntry)
+	perfStatGetters := map[string]statGetter{
+		"memory": getMemoryStats,
+		"cpu":    getCPUStats,
+		"disk":   getDiskStats,
 	}
-	cpuInfo, err := getCPUStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get CPU details: %s", err)
-	}
-	diskInfo, err := getDiskStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get disk details: %s", err)
+
+	for statName, getStatsFunc := range perfStatGetters {
+		stats, err := getStatsFunc()
+		if err != nil {
+			return nil, fmt.Errorf("Cannot get %s details: %s", statName, err)
+		}
+		stats.Date = getDateFormatted()
+		statEntries[statName] = stats
 	}
 
 	return SysStat{
-		Memory: memInfo,
-		CPU:    cpuInfo,
-		Disk:   diskInfo,
+		Memory: statEntries["memory"],
+		CPU:    statEntries["cpu"],
+		Disk:   statEntries["disk"],
 	}, nil
 }
