@@ -8,11 +8,10 @@ import (
 	"os/exec"
 )
 
-// Convert sysStat in csv format to json
-func sysStatCSVToSysStat(cmdOut []byte) ([]SysStat, error) {
+// Convert csv to array of maps
+func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 
-	var statEntry SysStat
-	var stats []SysStat
+	var parsedCsv []map[string]string
 
 	reader := csv.NewReader(bytes.NewReader(cmdOut))
 	reader.FieldsPerRecord = -1
@@ -20,48 +19,67 @@ func sysStatCSVToSysStat(cmdOut []byte) ([]SysStat, error) {
 	csvData, err := reader.ReadAll()
 
 	if err != nil {
-		return stats, fmt.Errorf("Error while parsing .csv script output: %s", err)
+		return parsedCsv, fmt.Errorf("Error while parsing .csv script output: %s", err)
 	}
 
 	if csvData == nil {
-		return stats, errors.New("CSV data is empty")
+		return parsedCsv, errors.New("CSV data is empty")
 	}
 
+	headers := csvData[0]
+	// lowercase first letter and match value format with other platforms
+	for idx, header := range headers {
+		if header == "CookedValue" {
+			header = "value"
+		}
+		headers[idx] = lowerFirst(header)
+	}
+
+	// parse rows of .csv data
 	for _, each := range csvData[1:] {
-		statEntry.Date = each[0]
-		statEntry.Key = each[1]
-		statEntry.Value = each[2]
 
-		stats = append(stats, statEntry)
+		csvEntry := make(map[string]string)
+		for i := range headers {
+			csvEntry[headers[i]] = each[i]
+		}
+		parsedCsv = append(parsedCsv, csvEntry)
 	}
 
-	return stats, nil
+	return parsedCsv, nil
 }
 
-// Query performance stats on windows platform
-func queryWindowsSysStats() ([]byte, error) {
+// Query windows counters with powershell command
+func getPerfCounter(counterName string) (StatEntry, error) {
+	var statEntry StatEntry
 
-	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-file", "./SysStats.ps1")
+	// Run powershell command returning a performance counter
+	getCounterFmt := "& {Get-Counter -Counter \"%s\" | Select-Object -ExpandProperty CounterSamples | convertto-csv -NoTypeInformation}"
+	getCounter := fmt.Sprintf(getCounterFmt, counterName)
+	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-Command", getCounter)
 
 	out, err := cmdResult.Output()
+
 	if err != nil {
-		return nil, err
+		return statEntry, err
 	}
 
-	return out, nil
+	// Convert to csv
+	statEntry.Stats, err = parseCSVOutput(out)
+	if err != nil {
+		return statEntry, err
+	}
+
+	return statEntry, nil
 }
 
-func PlatformSysStats() (interface{}, error) {
+func getCPUStats() (StatEntry, error) {
+	return getPerfCounter("\\Processor Information(*)\\% Processor Time")
+}
 
-	csvOutput, err := queryWindowsSysStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get windows system performance details: %s", err)
-	}
+func getDiskStats() (StatEntry, error) {
+	return getPerfCounter("\\LogicalDisk(*)\\% Free Space")
+}
 
-	winStats, err := sysStatCSVToSysStat(csvOutput)
-	if err != nil {
-		return nil, fmt.Errorf("Cannot parse SysStats ps .csv: output %s", err)
-	}
-
-	return winStats, nil
+func getMemoryStats() (StatEntry, error) {
+	return getPerfCounter("\\Memory\\Available Bytes")
 }

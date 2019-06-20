@@ -14,9 +14,6 @@ import (
 	"github.com/Seneca-CDOT/StatUtils/perfstats"
 )
 
-// AppVersion - current app version
-const AppVersion = "0.1.0"
-
 type response struct {
 	Status  string      `json:"status"`
 	Data    interface{} `json:"data"`
@@ -69,10 +66,9 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(AppVersion)
+		fmt.Println(perfstats.AppVersion)
 		os.Exit(0)
 	}
-
 	// start up http server
 	fmt.Printf("Listening on port %d\n", *httpPortPtr)
 

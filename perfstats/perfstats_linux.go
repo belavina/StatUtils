@@ -2,7 +2,6 @@ package perfstats
 
 import (
 	"bufio"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -78,12 +77,6 @@ func parseProcStat() (map[string][]float64, error) {
 	return cpuStats, nil
 }
 
-func getDateFormatted() string {
-	// match date format returned by win
-	dt := time.Now()
-	return dt.Format("1/2/2006 3:04:05 PM")
-}
-
 // compute active and total CPU utilizations from proc/stat readings
 func computeActiveTotalCPU(procStats map[string][]float64) (map[string]float64, map[string]float64) {
 
@@ -107,21 +100,20 @@ func computeActiveTotalCPU(procStats map[string][]float64) (map[string]float64, 
 }
 
 // compute CPU utilization by getting 2 samples and calculating delta between them
-func getCPUStats() ([]SysStat, error) {
+func getCPUStats() (StatEntry, error) {
 
 	// based on:
 	// https://stackoverflow.com/questions/26791240/how-to-get-percentage-of-processor-use-with-bash
 
-	var sysStats []SysStat
-	var statEntry SysStat
+	var statEntry StatEntry
+	var cpuStats []map[string]string
 
-	dateFormatted := getDateFormatted()
 	timeBetweenSamples := 2 * time.Second
 
 	// sample 2 stats with a time-delay in between
 	procStatOne, err := parseProcStat()
 	if err != nil {
-		return sysStats, err
+		return statEntry, err
 	}
 	activeOne, totalOne := computeActiveTotalCPU(procStatOne)
 	time.Sleep(timeBetweenSamples)
@@ -133,21 +125,26 @@ func getCPUStats() ([]SysStat, error) {
 		cpuUtilization := (100 * (activeTwo[cpuName] - activeOne[cpuName]) /
 			(totalTwo[cpuName] - totalOne[cpuName]))
 
+		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
-		statEntry.Date = dateFormatted
-		statEntry.Key = cpuName
-		statEntry.Value = strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
-
-		sysStats = append(sysStats, statEntry)
+		cpuStats = append(cpuStats, map[string]string{
+			"cpuName":   cpuName,
+			"value":     fmtUtilization,
+			"valueType": "% CPU Utilization",
+		})
 	}
 
-	return sysStats, nil
+	statEntry.Stats = cpuStats
+	return statEntry, nil
 }
 
-func getMemoryStats() (SysStat, error) {
+// Find out memory usage with free
+func getMemoryStats() (StatEntry, error) {
 
-	var memStat SysStat
+	var statEntry StatEntry
+	var memStats []map[string]string
 
+	// free output rows:
 	const (
 		header = iota
 		memory = iota
@@ -158,35 +155,68 @@ func getMemoryStats() (SysStat, error) {
 
 	out, err := cmdResult.Output()
 	if err != nil {
-		return memStat, err
+		return statEntry, err
 	}
 
 	// get total, used, free etc. (discard first token sicne it's a label "Mem:")
 	memInfo := strings.Fields(strings.Split(string(out[:]), "\n")[memory])[1:]
 
-	memStat.Date = getDateFormatted()
-	memStat.Key = "Memory Available"
-	memStat.Value = memInfo[memoryAvailable]
+	statEntry.Stats = append(
+		memStats,
+		map[string]string{
+			"value":     memInfo[memoryAvailable],
+			"valueType": "Memory Available (bytes)",
+		})
 
-	return memStat, nil
+	return statEntry, nil
 }
 
-// PlatformSysStats Query performance stats on linux platform
-func PlatformSysStats() (interface{}, error) {
+// Free returns usage%, get available % to match windows counter output
+func getSpaceAvailablePercentage(diskMap map[string]string) string {
+	availableSpace, _ := strconv.ParseFloat(diskMap["available"], 64)
+	usedSpace, _ := strconv.ParseFloat(diskMap["used"], 64)
 
-	var stats []SysStat
+	return strconv.FormatFloat(availableSpace*100/(availableSpace+usedSpace), 'f', 6, 64)
+}
 
-	memInfo, err := getMemoryStats()
+func getDiskStats() (StatEntry, error) {
+	var statEntry StatEntry
+	var diskStats []map[string]string
+
+	cmdResult := exec.Command("df")
+	out, err := cmdResult.Output()
 	if err != nil {
-		return nil, fmt.Errorf("Cannot get memory details: %s", err)
-	}
-	cpuInfo, err := getCPUStats()
-	if err != nil {
-		return nil, fmt.Errorf("Cannot get CPU details: %s", err)
+		return statEntry, err
 	}
 
-	stats = append(stats, memInfo)
-	stats = append(stats, cpuInfo...)
+	lines := strings.Split(string(out[:]), "\n")
+	headers := strings.Fields(lines[0])
 
-	return stats, nil
+	// drop "on" part from tokenized "Mounted on"
+	// and change header format from initcap to camel
+	headers = headers[:len(headers)-1]
+	for i := range headers {
+		headers[i] = lowerFirst(headers[i])
+	}
+
+	// parse disks/filesystems
+	for _, line := range lines[1:] {
+		tokens := strings.Fields(line)
+
+		if len(tokens) != len(headers) {
+			continue
+		}
+
+		lineMap := make(map[string]string)
+		for i := range headers {
+			lineMap[headers[i]] = tokens[i]
+		}
+
+		lineMap["valueType"] = "Space Available"
+		lineMap["value"] = getSpaceAvailablePercentage(lineMap)
+		diskStats = append(diskStats, lineMap)
+	}
+
+	statEntry.Stats = diskStats
+	return statEntry, nil
 }
