@@ -9,7 +9,7 @@ import (
 )
 
 // AppVersion - current app version
-const AppVersion = "0.2.0"
+const AppVersion = "0.3.0"
 
 // StatEntry specific performance data sweep
 type StatEntry struct {
@@ -19,9 +19,10 @@ type StatEntry struct {
 
 // SysStat Performance statistics
 type SysStat struct {
-	CPU    StatEntry `json:"cpu"`
-	Disk   StatEntry `json:"disk"`
-	Memory StatEntry `json:"memory"`
+	System interface{} `json:"system"` // platform details
+	CPU    StatEntry   `json:"cpu"`    // CPU utilization
+	Disk   StatEntry   `json:"disk"`   // Space for disk(s)
+	Memory StatEntry   `json:"memory"` // Space for memory
 }
 
 type statGetter func() (StatEntry, error)
@@ -52,6 +53,7 @@ func GetPlatformInfo() (interface{}, error) {
 // (calls either _linux.go or _windows perfstats implementations)
 func PlatformSysStats() (interface{}, error) {
 
+	// find out current stats:
 	statEntries := make(map[string]StatEntry)
 	perfStatGetters := map[string]statGetter{
 		"memory": getMemoryStats,
@@ -68,7 +70,14 @@ func PlatformSysStats() (interface{}, error) {
 		statEntries[statName] = stats
 	}
 
+	// query platform details:
+	platformDetails, err := GetPlatformInfo()
+	if err != nil {
+		return nil, fmt.Errorf("Cannot get system platform details %s", err)
+	}
+
 	return SysStat{
+		System: platformDetails,
 		Memory: statEntries["memory"],
 		CPU:    statEntries["cpu"],
 		Disk:   statEntries["disk"],
