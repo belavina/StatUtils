@@ -34,10 +34,10 @@ For windows, `instanceName` indicates cpu instance or disk name if applicable;
    "message": "",
    "data": {
       "system": {
-			"machine": "win.host",
-			"platform": "windows",
-			"softwareVersion": "0.0.0"
-		},
+         "machine": "win.host",
+         "platform": "windows",
+         "softwareVersion": "0.0.0"
+      },
       "cpu": {
          "stats": [
             {
