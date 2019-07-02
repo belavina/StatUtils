@@ -33,6 +33,11 @@ For windows, `instanceName` indicates cpu instance or disk name if applicable;
    "status": "success",
    "message": "",
    "data": {
+      "system": {
+         "machine": "win.host",
+         "platform": "windows",
+         "softwareVersion": "0.0.0"
+      },
       "cpu": {
          "stats": [
             {
@@ -104,6 +109,7 @@ Identification of hardware devices on linux differs from the windows output (for
    "status": "success",
    "message": "",
    "data": {
+      "system": { ... },
       "cpu": {
          "stats": [
             {
