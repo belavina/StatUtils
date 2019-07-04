@@ -39,6 +39,7 @@ func parseCSVOutput(cmdOut []byte) ([]map[string]string, error) {
 	for _, each := range csvData[1:] {
 
 		csvEntry := make(map[string]string)
+
 		for i := range headers {
 			csvEntry[headers[i]] = each[i]
 		}
@@ -77,7 +78,27 @@ func getCPUStats() (StatEntry, error) {
 }
 
 func getDiskStats() (StatEntry, error) {
-	return getPerfCounter("\\LogicalDisk(*)\\% Free Space")
+
+	var statEntry StatEntry
+
+	// Run powershell command returning a performance counter
+	getWmiCommand := "& {Get-WmiObject -Class Win32_logicaldisk | Select-Object -Property DeviceID, Size, FreeSpace | convertto-csv -NoTypeInformation}"
+	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-Command", getWmiCommand)
+
+	out, err := cmdResult.Output()
+
+	if err != nil {
+		return statEntry, err
+	}
+
+	// Convert to csv
+	statEntry.Stats, err = parseCSVOutput(out)
+	if err != nil {
+		return statEntry, err
+	}
+
+	return statEntry, nil
+
 }
 
 func getMemoryStats() (StatEntry, error) {
