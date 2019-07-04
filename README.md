@@ -20,10 +20,9 @@ Current performance stats can be accessed at HTTP port `:9159` & route `/sysstat
 $ curl -i "http://{{vm_host}}:9159/sysstats"
 ```
 
-On both platforms, `value` for a specific hardware group indicates performance measure in the following format:
+On both platforms, `value` for harware type `cpu` or `memory` indicates the following:
 
 - `cpu`: % Processor Time is the percentage of elapsed time that the processor spends to execute a non-Idle thread (CPU Utilization, see [Microsoft Docs](https://social.technet.microsoft.com/wiki/contents/articles/12984.understanding-processor-processor-time-and-process-processor-time.aspx))
-- `disk`: Percentage available of total storage space
 - `memory`: Memory Available in Bytes
 
 For windows, `instanceName` indicates cpu instance or disk name if applicable;
@@ -61,18 +60,10 @@ For windows, `instanceName` indicates cpu instance or disk name if applicable;
       "disk": {
          "stats": [
             {
-               "counterType": "RawFraction",
-               "defaultScale": "0",
-               "instanceName": "harddiskvolume1",
-               "multipleCount": "1",
-               "path": "\\\\desktop-fo9p270\\logicaldisk(harddiskvolume1)\\% free space",
-               "rawValue": "175",
-               "secondValue": "578",
-               "status": "0",
-               "timeBase": "10000000",
-               "timestamp": "6\/19\/2019 10:53:01 AM",
-               "timestamp100NSec": "132054151816460000",
-               "value": "30.2768166089965"
+               "deviceID": "C:",
+               "freeSpace": "18850095104",
+               "size": "42340446208",
+               "used": "23490351104"
             },
             { ... }
         ],

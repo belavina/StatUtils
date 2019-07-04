@@ -64,7 +64,7 @@ func getPerfCounter(counterName string) (StatEntry, error) {
 		return statEntry, err
 	}
 
-	// Convert to csv
+	// process powershell response
 	statEntry.Stats, err = parseCSVOutput(out)
 	if err != nil {
 		return statEntry, err
@@ -77,13 +77,16 @@ func getCPUStats() (StatEntry, error) {
 	return getPerfCounter("\\Processor Information(*)\\% Processor Time")
 }
 
+// get disk statistics using WmiObject ps command
+// good overview of Get-WmiObject:
+// https://mcpmag.com/articles/2018/01/26/view-drive-information-with-powershell.aspx
 func getDiskStats() (StatEntry, error) {
 
 	var statEntry StatEntry
 
 	// Query logical disk restricting drives to "local disk" type (#3)
 	getWmiCommand := "& {Get-WmiObject -Class Win32_logicaldisk -Filter \"DriveType = '3'\" "
-	// Get total, free and calculate used (all in bytes)
+	// Get drive letter, total, free and calculate used (all in bytes)
 	getWmiCommand += "| Select-Object -Property DeviceID, Size, FreeSpace, @{L=\"Used\";E={\"{0}\" -f ($_.Size-$_.FreeSpace)} } "
 	getWmiCommand += "| convertto-csv -NoTypeInformation}"
 	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-Command", getWmiCommand)
@@ -94,7 +97,6 @@ func getDiskStats() (StatEntry, error) {
 		return statEntry, err
 	}
 
-	// Convert to csv
 	statEntry.Stats, err = parseCSVOutput(out)
 	if err != nil {
 		return statEntry, err
