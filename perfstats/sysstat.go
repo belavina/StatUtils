@@ -9,7 +9,7 @@ import (
 )
 
 // AppVersion - current app version
-const AppVersion = "0.3.0"
+const AppVersion = "0.4.0"
 
 // StatEntry specific performance data sweep
 type StatEntry struct {

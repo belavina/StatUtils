@@ -20,12 +20,13 @@ Current performance stats can be accessed at HTTP port `:9159` & route `/sysstat
 $ curl -i "http://{{vm_host}}:9159/sysstats"
 ```
 
-On both platforms, `value` for harware type `cpu` or `memory` indicates the following:
+On both platforms, stats include the following performance indicators:
 
-- `cpu`: % Processor Time is the percentage of elapsed time that the processor spends to execute a non-Idle thread (CPU Utilization, see [Microsoft Docs](https://social.technet.microsoft.com/wiki/contents/articles/12984.understanding-processor-processor-time-and-process-processor-time.aspx))
-- `memory`: Memory Available in Bytes
+- cpu `utilization` — % Processor Time is the percentage of elapsed time that the processor spends to execute a non-Idle thread (CPU Utilization, see [Microsoft Docs](https://social.technet.microsoft.com/wiki/contents/articles/12984.understanding-processor-processor-time-and-process-processor-time.aspx))
+- memory `available` (in bytes)
+- disk `size`, `used` and `freeSpace` (all in bytes)
 
-For windows, `instanceName` indicates cpu instance or disk name if applicable;
+For windows, `instanceName` indicates cpu instance and `deviceID` stores disk drive letter:
 
 ```javascript
 {
@@ -51,7 +52,7 @@ For windows, `instanceName` indicates cpu instance or disk name if applicable;
                "timeBase": "10000000",
                "timestamp": "6\/19\/2019 10:52:59 AM",
                "timestamp100NSec": "132054151798539933",
-               "value": "9.41475786277403"
+               "utilization": "9.41475786277403"
             }
             { ... }
          ],
@@ -83,7 +84,7 @@ For windows, `instanceName` indicates cpu instance or disk name if applicable;
                "timeBase": "10000000",
                "timestamp": "6\/19\/2019 10:52:58 AM",
                "timestamp100NSec": "132054151780150000",
-               "value": "1515257856"
+               "available": "1515257856"
             }
          ],
          "date": "20190619145256"
@@ -105,8 +106,7 @@ Identification of hardware devices on linux differs from the windows output (for
          "stats": [
             {
                "cpuName": "cpu1",
-               "value": "7.575758",
-               "valueType": "% CPU Utilization"
+               "utilization": "16.580311"
             },
             { ... }
          ],
@@ -115,14 +115,13 @@ Identification of hardware devices on linux differs from the windows output (for
       "disk": {
          "stats": [
             {
-               "1K-blocks": "224021164",
-               "available": "171205740",
+               "1B-blocks": "229397671936",
                "filesystem": "/dev/mapper/fedora_localhost--live-home",
+               "freeSpace": "175291777024",
                "mounted": "/home",
+               "size": "229397671936",
                "use%": "20%",
-               "used": "41366080",
-               "value": "80.540186",
-               "valueType": "Space Available"
+               "used": "42381766656"
             },
             { ... }
         ],
@@ -131,8 +130,9 @@ Identification of hardware devices on linux differs from the windows output (for
       "memory": {
          "stats": [
             {
-               "value": "22358220800",
-               "valueType": "Memory Available (bytes)"
+               "available": "16094851072",
+               "total": "33646678016",
+               "used": "16707964928"
             }
          ],
          "date": "20190619145256"
