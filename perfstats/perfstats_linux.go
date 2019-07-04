@@ -128,9 +128,8 @@ func getCPUStats() (StatEntry, error) {
 		fmtUtilization := strconv.FormatFloat(cpuUtilization, 'f', 6, 64)
 		// Populate returned cpu performance stats
 		cpuStats = append(cpuStats, map[string]string{
-			"cpuName":   cpuName,
-			"value":     fmtUtilization,
-			"valueType": "% CPU Utilization",
+			"cpuName":     cpuName,
+			"utilization": fmtUtilization,
 		})
 	}
 
@@ -164,8 +163,9 @@ func getMemoryStats() (StatEntry, error) {
 	statEntry.Stats = append(
 		memStats,
 		map[string]string{
-			"value":     memInfo[memoryAvailable],
-			"valueType": "Memory Available (bytes)",
+			"total":     memInfo[memoryTotal],
+			"used":      memInfo[memoryUsed],
+			"available": memInfo[memoryAvailable],
 		})
 
 	return statEntry, nil
