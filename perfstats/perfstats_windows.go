@@ -81,8 +81,9 @@ func getDiskStats() (StatEntry, error) {
 
 	var statEntry StatEntry
 
-	// Run powershell command returning a performance counter
-	getWmiCommand := "& {Get-WmiObject -Class Win32_logicaldisk "
+	// Query logical disk restricting drives to "local disk" type (#3)
+	getWmiCommand := "& {Get-WmiObject -Class Win32_logicaldisk -Filter \"DriveType = '3'\" "
+	// Get total, free and calculate used (all in bytes)
 	getWmiCommand += "| Select-Object -Property DeviceID, Size, FreeSpace, @{L=\"Used\";E={\"{0}\" -f ($_.Size-$_.FreeSpace)} } "
 	getWmiCommand += "| convertto-csv -NoTypeInformation}"
 	cmdResult := exec.Command("powershell.exe", "-executionpolicy", "bypass", "-Command", getWmiCommand)
